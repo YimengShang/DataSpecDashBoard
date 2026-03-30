@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Data Spec Builder — Eli Lilly SDIA</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#F5F8FC;min-height:100vh;display:flex;flex-direction:column;font-size:13px;color:#222}
+button{font-family:inherit;cursor:pointer}
+select,input,textarea{font-family:inherit;font-size:13px;color:#222;box-sizing:border-box}
+.badge{display:inline-block;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700}
+.b-blue{background:#E8F2FA;color:#0060A9}.b-green{background:#E8F5E9;color:#2E7D32}
+.b-amber{background:#FFF8E1;color:#F59E0B}.b-red{background:#FFEBEE;color:#C62828}
+.b-purple{background:#F3E5F5;color:#6A1B9A}.b-teal{background:#E0F2F1;color:#00695C}
+.b-orange{background:#FFF3E0;color:#E65100}
+#hdr{background:#003D73;padding:12px 24px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+.logo{width:32px;height:32px;background:#00A0DF;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.hdr-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+.btn-acc{background:#00A0DF;color:#fff;border:none;border-radius:8px;padding:8px 20px;font-weight:700;font-size:13px}
+.btn-acc:hover{background:#0090CF}.btn-acc:disabled{background:#667;cursor:not-allowed}
+.btn-out{background:transparent;color:#90CAE8;border:1px solid #90CAE8;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12px}
+.btn-grn{background:#2E7D32;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-weight:700;font-size:12px}
+.btn-sug{background:#7B1FA2;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:700;font-size:13px}
+.btn-sug:hover{background:#6A1B9A}.btn-sug:disabled{background:#aaa;cursor:not-allowed}
+#stbar{padding:14px 24px;background:#fff;border-bottom:1px solid #D1E3F3}
+.st-label{font-size:12px;font-weight:800;color:#003D73;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.st-grid{display:flex;gap:10px}
+.st-card{flex:1;padding:11px 13px;border-radius:10px;cursor:pointer;text-align:left;border:2px solid #D1E3F3;background:#FAFBFC;transition:all .15s}
+.st-icon{font-size:17px;margin-bottom:4px}
+.st-name{font-size:11px;font-weight:700;margin-bottom:3px;line-height:1.3;color:#444}
+.st-card.act .st-name{color:var(--c)}
+.st-desc{font-size:10px;color:#777;line-height:1.35}
+#metabar{background:#EBF4FB;border-bottom:1px solid #D1E3F3;padding:9px 24px;display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.mi{padding:6px 10px;border:1px solid #C8DDF0;border-radius:6px;font-size:13px;outline:none;background:#fff}
+#body{display:flex;flex:1;overflow:hidden;height:calc(100vh - 146px)}
+#nav{width:208px;flex-shrink:0;border-right:1px solid #D1E3F3;overflow-y:auto;background:#fff}
+.nb{display:flex;align-items:center;gap:8px;width:100%;padding:9px 12px;border:none;background:transparent;border-right:3px solid transparent;color:#555;font-size:13px;text-align:left;cursor:pointer}
+.nb:hover{background:#F5F8FC}.nb.act{background:#E8F2FA;border-right-color:#0060A9;color:#003D73;font-weight:700}
+.nb-pct{font-size:10px;font-weight:700;margin-left:auto}
+#main{flex:1;overflow-y:auto;padding:20px 24px}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.si{font-size:21px}.st2{font-size:18px;font-weight:800;color:#003D73}
+.scard{background:#fff;border:1px solid #D1E3F3;border-radius:10px;padding:20px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.fgg{display:flex;flex-direction:column;gap:4px}
+.fgg.s2{grid-column:span 2}
+.fl{font-size:12px;font-weight:700;color:#003D73}
+.fi{width:100%;padding:7px 10px;border:1px solid #C8DDF0;border-radius:6px;font-size:13px;outline:none;background:#fff}
+.fi:focus{border-color:#0060A9}
+.ms{display:flex;flex-wrap:wrap;gap:6px}
+.msb{padding:4px 10px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #C8DDF0;background:#fff;color:#666}
+.msb.on{border-color:#0060A9;background:#E8F2FA;color:#0060A9;font-weight:700}
+.nav-acts{display:flex;justify-content:space-between;margin-top:15px}
+.bp{padding:8px 18px;border:1px solid #C8DDF0;border-radius:8px;background:#fff;color:#0060A9;font-weight:700}
+.bp:disabled{color:#ccc;cursor:not-allowed}
+.bn{padding:8px 18px;border:none;border-radius:8px;background:#0060A9;color:#fff;font-weight:700}
+.bn:disabled{background:#bbb;cursor:not-allowed}
+#prev{width:238px;flex-shrink:0;border-left:1px solid #D1E3F3;padding:15px 12px;overflow-y:auto;font-size:12px;background:#fff}
+.pvt{font-weight:800;color:#003D73;margin-bottom:11px;font-size:13px}
+.pvs{margin-bottom:11px}
+.pvl{font-weight:700;color:#555;margin-bottom:2px}
+.pvv{color:#333;font-size:11px}
+.pbw{height:6px;background:#E0E0E0;border-radius:3px;overflow:hidden;margin:3px 0}
+.pbf{height:100%;transition:width .3s}
+.vbox{border-radius:6px;padding:9px}
+.vt{font-weight:800;font-size:11px;margin-bottom:3px}
+.vi{font-size:11px;margin-bottom:2px}
+.sout-hdr{display:flex;align-items:center;gap:10px;margin-bottom:15px}
+.sout-body{background:#fff;border:1px solid #D1E3F3;border-radius:10px;padding:22px;white-space:pre-wrap;font-size:13px;line-height:1.8;color:#222}
+.sugpanel{background:#F8F0FF;border:1px solid #CE93D8;border-radius:10px;padding:15px;margin-top:15px}
+.sugpt{font-size:13px;font-weight:800;color:#6A1B9A;margin-bottom:8px}
+.sugout{font-size:13px;line-height:1.7;color:#333;white-space:pre-wrap}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.es{display:flex;align-items:center;justify-content:center;height:60%;flex-direction:column;gap:8px;color:#aaa}
+.suggest-divider{margin-top:18px;padding-top:15px;border-top:1px solid #D1E3F3}
+.suggest-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+/* criteria rows */
+.crit-list{display:flex;flex-direction:column;gap:7px;margin-top:6px}
+.crit-row{display:flex;align-items:flex-start;gap:8px}
+.crit-num{width:24px;height:24px;border-radius:50%;background:#E8F2FA;color:#0060A9;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px}
+.crit-inp{flex:1;padding:7px 10px;border:1px solid #C8DDF0;border-radius:6px;font-size:13px;outline:none;background:#fff;resize:vertical;min-height:34px}
+.crit-inp:focus{border-color:#0060A9}
+.crit-del{width:26px;height:26px;border:none;border-radius:6px;background:#FFEBEE;color:#C62828;font-size:13px;font-weight:900;margin-top:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-btn{margin-top:8px;padding:6px 14px;border:1px dashed #C8DDF0;border-radius:6px;background:#F5F8FC;color:#0060A9;font-size:12px;font-weight:700;cursor:pointer}
+.add-btn:hover{background:#E8F2FA}
+/* var table */
+.vtbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.vtbl th{background:#003D73;color:#fff;padding:6px 10px;text-align:left;font-weight:700}
+.vtbl td{padding:6px 10px;border-bottom:1px solid #E0E0E0;vertical-align:top}
+.vtbl tr:nth-child(even) td{background:#F5F8FC}
+.vtbl td input,.vtbl td select{width:100%;padding:4px 7px;border:1px solid #C8DDF0;border-radius:4px;font-size:12px;outline:none}
+.vtbl td input:focus,.vtbl td select:focus{border-color:#0060A9}
+.vtbl .del-var{background:none;border:none;color:#C62828;font-size:13px;font-weight:900;cursor:pointer;padding:0 4px}
+/* period grid */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.pgrid-item{display:flex;flex-direction:column;gap:4px}
+/* section header */
+.sec-sub{font-size:12px;font-weight:800;color:#003D73;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px solid #D1E3F3}
+/* checklist section */
+.ck-group{margin-bottom:14px}
+.ck-head{font-size:12px;font-weight:800;color:#003D73;margin-bottom:7px}
+.ck-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0}
+.ck-row input{width:14px;height:14px;margin-top:2px;flex-shrink:0;accent-color:#0060A9}
+.ck-row.done span{color:#999;text-decoration:line-through}
+.feas-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.feas-btn{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #C8DDF0;background:#fff;color:#666}
+.feas-btn.on{border-color:#0060A9;background:#E8F2FA;color:#0060A9;font-weight:700}
+</style>
+</head>
+<body>
+<div id="hdr">
+  <div class="logo">📋</div>
+  <div>
+    <div style="color:#fff;font-weight:800;font-size:16px">Data Spec Builder</div>
+    <div style="color:#90CAE8;font-size:11px">Real-World Evidence · Strada Data Specification Generator</div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn-acc" id="btnGen" onclick="generateSpec()" disabled>✨ Generate Data Spec</button>
+    <button class="btn-out" id="btnTog" onclick="toggleOutput()" style="display:none">Show Output</button>
+    <button class="btn-grn" id="btnExp" onclick="exportToWord()" style="display:none">📄 Export to Word</button>
+  </div>
+</div>
+<div id="stbar">
+  <div class="st-label">Select Study Phase / Request Type</div>
+  <div class="st-grid" id="stgrid"></div>
+</div>
+<div id="metabar">
+  <input class="mi" style="width:200px" placeholder="Strada Project Request ID" oninput="S.meta.reqId=this.value;rPrev()">
+  <input class="mi" style="width:220px" placeholder="Study Title / Brief Description" oninput="S.meta.title=this.value;rPrev()">
+  <input class="mi" style="width:180px" placeholder="Requestor Name(s)" oninput="S.meta.requestor=this.value;rPrev()">
+  <input class="mi" style="width:180px" placeholder="Data Source" oninput="S.meta.dataSource=this.value;rPrev()">
+  <input class="mi" style="width:128px" type="date" id="mdate" oninput="S.meta.date=this.value">
+</div>
+<div id="body">
+  <nav id="nav"></nav>
+  <div id="main"></div>
+  <div id="prev"></div>
+</div>
+<script>
+const CL={B:"#0060A9",D:"#003D73",L:"#E8F2FA",A:"#00A0DF",G:"#2E7D32",AM:"#F59E0B",R:"#C62828",P:"#6A1B9A",PL:"#F3E5F5",T:"#00695C",TL:"#E0F2F1",O:"#E65100",OL:"#FFF3E0"};
+const STYPES=[
+  {id:"feasibility",label:"Feasibility / Pilot",icon:"🔍",color:CL.AM,bg:"#FFF8E1",desc:"Initial cohort sizing, signal detection, attrition assessment before committing to full study."},
+  {id:"comparative",label:"Comparative Effectiveness",icon:"⚖️",color:CL.B,bg:CL.L,desc:"Treatment vs. comparator cohort analysis with PSM/IPTW. Primary vehicle for most RWE studies."},
+  {id:"longitudinal",label:"Longitudinal / Outcomes",icon:"📈",color:CL.T,bg:CL.TL,desc:"Single-arm follow-up, trajectory, weight change, or time-to-event without active comparator."},
+  {id:"regulatory",label:"Regulatory Submission",icon:"🏛️",color:CL.P,bg:CL.PL,desc:"FDA/EMA submissions requiring rigorous fit-for-purpose documentation and full variable spec."},
+  {id:"nco",label:"NCO / Calibration",icon:"🧪",color:CL.O,bg:CL.OL,desc:"Negative control outcome dataset construction for empirical calibration and bias assessment."},
+];
+
+// SECTIONS
+const SECS={
+  overview:{label:"1. Study Overview",icon:"📁"},
+  periods:{label:"2. Study Periods",icon:"📅"},
+  inclusion:{label:"3. Inclusion Criteria",icon:"✅"},
+  exclusion:{label:"4. Exclusion Criteria",icon:"🚫"},
+  outcomes:{label:"5. Outcomes & Treatment",icon:"🎯"},
+  algorithm:{label:"6. Cohort Algorithm",icon:"⚙️"},
+  feasibility:{label:"7. Feasibility Checks",icon:"🔬"},
+  variables:{label:"8. Variable Definitions",icon:"📊"},
+  nco:{label:"9. Negative Controls",icon:"🧪"},
+  considerations:{label:"10. Considerations",icon:"📝"},
+};
+
+// STATE
+const S={
+  studyType:"",
+  activeSection:"overview",
+  meta:{reqId:"",title:"",requestor:"",dataSource:"",date:new Date().toISOString().split("T")[0]},
+  // overview
+  overview:{objective_primary:"",objective_secondary:"",note:""},
+  // periods
+  periods:{study_period:"",index_period:"",baseline_comorbidity:"",baseline_weight:"",baseline_t2d:"",ce_requirement:"at least 12 months pre-index medical and pharmacy benefits, with up to 45 gap days allowed",followup:"",index_event:""},
+  // inclusion/exclusion as arrays of strings
+  inclusion:[],
+  exclusion:[],
+  // outcomes
+  outcomes:{primary_outcome:"",secondary_outcomes:"",treatment_arm:"",comparator_arm:"",treatment_note:""},
+  // algorithm
+  algorithm:{steps:"",notes:""},
+  // feasibility checks (toggled list)
+  feasibility:[],
+  // variables: array of {name, definition, note, range}
+  variables:[],
+  // nco
+  nco:{nco_source:"",nco_note:"",nco_datasets:""},
+  // considerations
+  considerations:{missing_data:"",data_sources_note:"",output_format:"",other_notes:""},
+  // output
+  specOut:"",showOut:false,generating:false,
+};
+document.getElementById("mdate").value=S.meta.date;
+
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function p(n,d){return d?Math.round(n/d*100):0;}
+function pctC(p){return p===100?CL.G:p>50?CL.AM:"#bbb";}
+function warnC(p){return p<50?CL.R:p<80?CL.AM:CL.G;}
+
+// STUDY TYPE
+function rStypes(){
+  const el=document.getElementById("stgrid");
+  el.innerHTML=STYPES.map(t=>{
+    const isSel=S.studyType===t.id;
+    return`<button class="st-card${isSel?" act":""}" style="--c:${t.color};${isSel?`background:${t.bg};`:""};border-color:${isSel?t.color:"#D1E3F3"}" onclick="pickST('${t.id}')">
+      <div class="st-icon">${t.icon}</div>
+      <div class="st-name">${t.label}</div>
+      <div class="st-desc">${t.desc}</div>
+      ${isSel?`<div style="margin-top:6px"><span class="badge b-blue">Active</span></div>`:""}
+    </button>`;
+  }).join("");
+}
+function pickST(id){S.studyType=id;S.activeSection="overview";document.getElementById("btnGen").disabled=false;rStypes();rNav();rMain();rPrev();}
+
+// NAV completeness
+function secComp(k){
+  if(k==="inclusion")return S.inclusion.filter(v=>v.trim()).length>0?100:0;
+  if(k==="exclusion")return S.exclusion.filter(v=>v.trim()).length>0?100:0;
+  if(k==="feasibility")return S.feasibility.length>0?100:0;
+  if(k==="variables")return S.variables.filter(v=>v.name.trim()).length>0?100:0;
+  if(k==="nco")return S.nco.nco_source?100:0;
+  const obj=S[k];if(!obj||typeof obj!=="object")return 0;
+  const vals=Object.values(obj).filter(v=>typeof v==="string");
+  return p(vals.filter(v=>v.trim()).length,vals.length||1);
+}
+
+function rNav(){
+  const el=document.getElementById("nav");
+  el.innerHTML=Object.entries(SECS).map(([k,sec])=>{
+    const cp=secComp(k);const isA=S.activeSection===k;
+    return`<button class="nb${isA?" act":""}" onclick="goSec('${k}')"><span>${sec.icon}</span><span style="flex:1;line-height:1.3">${sec.label}</span><span class="nb-pct" style="color:${pctC(cp)}">${cp>0?cp+"%":""}</span></button>`;
+  }).join("");
+}
+function goSec(k){S.activeSection=k;rNav();rMain();}
+
+// CRITERIA LIST (inclusion/exclusion)
+function rCriteria(arrKey,color){
+  const arr=S[arrKey];
+  let h=`<div class="crit-list" id="crit_${arrKey}">`;
+  arr.forEach((v,i)=>{
+    h+=`<div class="crit-row">
+      <div class="crit-num" style="background:${color}22;color:${color}">${i+1}</div>
+      <textarea class="crit-inp" rows="2" placeholder="Criterion ${i+1}..." oninput="S.${arrKey}[${i}]=this.value;rPrev()">${esc(v)}</textarea>
+      <button class="crit-del" onclick="delCrit('${arrKey}',${i})" title="Remove">×</button>
+    </div>`;
+  });
+  h+=`</div><button class="add-btn" onclick="addCrit('${arrKey}')">+ Add Criterion</button>`;
+  return h;
+}
+function addCrit(k){S[k].push("");rMain();}
+function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
+
+// VARIABLE TABLE
+const VAR_CATS=["Demographics","Treatment","Dates","Clinical / Comorbidities","Lab Values","Outcomes","NCO","Other"];
+function rVarTable(){
+  let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+    <span style="font-size:12px;font-weight:700;color:#003D73">Variable Definitions Table</span>
+    <button class="add-btn" style="margin:0" onclick="addVar()">+ Add Variable</button>
+    <button class="add-btn" style="margin:0;border-color:#A5D6A7;color:#2E7D32" onclick="addDefaultVars()">📋 Load Common Variables</button>
+  </div>
+  <table class="vtbl">
+    <tr><th style="width:140px">Variable Name</th><th>Definition</th><th>Note / Source</th><th style="width:110px">Plausible Range</th><th style="width:80px">Category</th><th style="width:30px"></th></tr>`;
+  S.variables.forEach((v,i)=>{
+    h+=`<tr>
+      <td><input value="${esc(v.name)}" placeholder="var_name" oninput="S.variables[${i}].name=this.value;rPrev()"></td>
+      <td><input value="${esc(v.definition)}" placeholder="Definition..." oninput="S.variables[${i}].definition=this.value"></td>
+      <td><input value="${esc(v.note)}" placeholder="Source / note..." oninput="S.variables[${i}].note=this.value"></td>
+      <td><input value="${esc(v.range)}" placeholder="e.g. 9–100" oninput="S.variables[${i}].range=this.value"></td>
+      <td><select onchange="S.variables[${i}].cat=this.value">${VAR_CATS.map(c=>`<option${v.cat===c?" selected":""}>${c}</option>`).join("")}</select></td>
+      <td><button class="del-var" onclick="delVar(${i})" title="Delete">×</button></td>
+    </tr>`;
+  });
+  h+=`</table>`;
+  return h;
+}
+function addVar(){S.variables.push({name:"",definition:"",note:"",range:"",cat:"Other"});rMain();}
+function delVar(i){S.variables.splice(i,1);rMain();}
+function addDefaultVars(){
+  const defaults=[
+    {name:"PATID",definition:"Patient ID",note:"",range:"",cat:"Demographics"},
+    {name:"Age",definition:"Age at index date",note:"Age > 65 is a risk factor",range:"18–120",cat:"Demographics"},
+    {name:"Sex",definition:"Sex at index date",note:"",range:"",cat:"Demographics"},
+    {name:"Race",definition:"Race (Missing as category)",note:"",range:"",cat:"Demographics"},
+    {name:"Ethnicity",definition:"Hispanic or non-Hispanic (Missing as category)",note:"",range:"",cat:"Demographics"},
+    {name:"Region",definition:"US region (Missing as category)",note:"",range:"",cat:"Demographics"},
+    {name:"Payor",definition:"Commercial or Medicare or missing",note:"",range:"",cat:"Demographics"},
+    {name:"Drug",definition:"Treatment drug or SoC",note:"",range:"",cat:"Treatment"},
+    {name:"IndexDate",definition:"First qualifying treatment/event date during index period",note:"",range:"",cat:"Dates"},
+    {name:"LastDrugDate",definition:"Date of last day on index drug",note:"",range:"",cat:"Dates"},
+    {name:"LastFollowupDate",definition:"Min of: discontinuation, death, end of data, end of max follow-up",note:"",range:"",cat:"Dates"},
+    {name:"BMI",definition:"Value of BMI record in baseline BMI period, or missing",note:"Check Z code, observation/NLP EHR and LOINC code; prioritize closest to index date",range:"9–100",cat:"Lab Values"},
+    {name:"Date_BMI",definition:"Date of the BMI record",note:"",range:"",cat:"Lab Values"},
+    {name:"HBA1C",definition:"Value of HbA1c lab record in baseline period, or missing",note:"Use EHR lab data",range:"3.5%–20%",cat:"Lab Values"},
+    {name:"CCI",definition:"Baseline Charlson Comorbidity Index score",note:"Use the score, no need to derive from codelist",range:"",cat:"Clinical / Comorbidities"},
+    {name:"T2D",definition:"Yes/No in baseline T2D period",note:"Only from diagnosis code",range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hypertension",definition:"Yes/No in baseline period",note:"",range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hyperlipidemia",definition:"Yes/No in baseline period",note:"",range:"",cat:"Clinical / Comorbidities"},
+    {name:"CHA2DS2VASc_score",definition:"Numeric CHA₂DS₂-VASc score from component variables",note:"",range:"0–9",cat:"Clinical / Comorbidities"},
+    {name:"Time_outcome1",definition:"Time from index to first outcome event",note:"Within follow-up period",range:"",cat:"Outcomes"},
+    {name:"Event_outcome1",definition:"1 = event occurred, 0 = censored",note:"",range:"",cat:"Outcomes"},
+  ];
+  S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
+  rMain();rPrev();
+}
+
+// FEASIBILITY CHECKS
+const FEAS_OPTS=[
+  "Attrition table","Sample size by treatment arm","Baseline Table 1 (demographics, BMI, age, sex)",
+  "Annualized event rates at months 3/6/12/18/24/30","Event counts at months 3/6/12/18/24/30",
+  "Distribution of baseline diagnosis types","Time from baseline event to index date",
+  "Weight at baseline and follow-up months (3/6/12/18/24/30)","All available weight measurements (date + value)",
+  "Number of baseline events per patient","Position of diagnosis in claim (1st vs 2nd)",
+  "Histogram / ridge plot of time from baseline event to index",
+  "Love plot (SMD before/after matching)","K-M curves with log-rank test",
+  "PS distribution pre/post matching","NCO event rates by arm",
+];
+function rFeas(){
+  return`<div class="sec-sub">Select Feasibility Outputs to Request</div>
+    <div class="feas-grid">${FEAS_OPTS.map((o,i)=>`<button class="feas-btn${S.feasibility.includes(i)?" on":""}" onclick="togFeas(${i})">${o}</button>`).join("")}</div>
+    <div class="sec-sub" style="margin-top:18px">Additional Feasibility Notes</div>
+    <textarea class="fi s2" rows="3" placeholder="Any additional feasibility checks or custom tables..." oninput="S.overview.feasNotes=this.value">${esc(S.overview.feasNotes||"")}</textarea>`;
+}
+function togFeas(i){const idx=S.feasibility.indexOf(i);if(idx>-1)S.feasibility.splice(idx,1);else S.feasibility.push(i);rMain();rPrev();}
+
+// MAIN SECTION RENDERERS
+function rOverview(){
+  return`<div class="fg">
+    <div class="fgg s2"><label class="fl">Primary Objective</label>
+      <textarea class="fi" rows="3" placeholder="e.g. Effect of [Treatment] vs [Comparator] on [Outcome] in [Population]..." oninput="S.overview.objective_primary=this.value;rPrev()">${esc(S.overview.objective_primary)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Secondary Objective(s)</label>
+      <textarea class="fi" rows="2" placeholder="e.g. Assess weight trajectory, subgroup analyses by drug type..." oninput="S.overview.objective_secondary=this.value;rPrev()">${esc(S.overview.objective_secondary)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Study Note / Context</label>
+      <textarea class="fi" rows="2" placeholder="Any context, background, or special instructions for the data programmer..." oninput="S.overview.note=this.value;rPrev()">${esc(S.overview.note)}</textarea></div>
+  </div>`;
+}
+function rPeriods(){
+  const P=S.periods;
+  const onchg=(k)=>`S.periods['${k}']=this.value;rPrev()`;
+  return`<div class="pgrid">
+    <div class="pgrid-item"><label class="fl">Study Period (overall data window)</label>
+      <input class="fi" value="${esc(P.study_period)}" placeholder="e.g. Dec 1, 2016 – Jun 30, 2025" oninput="${onchg('study_period')}"></div>
+    <div class="pgrid-item"><label class="fl">Index Period (treatment initiation window)</label>
+      <input class="fi" value="${esc(P.index_period)}" placeholder="e.g. Dec 1, 2017 – Jun 30, 2024" oninput="${onchg('index_period')}"></div>
+    <div class="pgrid-item"><label class="fl">Baseline Comorbidity Period</label>
+      <input class="fi" value="${esc(P.baseline_comorbidity)}" placeholder="e.g. [index-12m, index-1 day]" oninput="${onchg('baseline_comorbidity')}"></div>
+    <div class="pgrid-item"><label class="fl">Baseline Weight / BMI Period</label>
+      <input class="fi" value="${esc(P.baseline_weight)}" placeholder="e.g. [index-183 days, index]" oninput="${onchg('baseline_weight')}"></div>
+    <div class="pgrid-item"><label class="fl">Baseline T2D / Lab Period</label>
+      <input class="fi" value="${esc(P.baseline_t2d)}" placeholder="e.g. [index-1 year, index]" oninput="${onchg('baseline_t2d')}"></div>
+    <div class="pgrid-item"><label class="fl">Index Event Definition</label>
+      <input class="fi" value="${esc(P.index_event)}" placeholder="e.g. first qualifying Rx during index period" oninput="${onchg('index_event')}"></div>
+    <div class="pgrid-item"><label class="fl">Continuous Enrollment Requirement</label>
+      <input class="fi" value="${esc(P.ce_requirement)}" placeholder="e.g. ≥12 months pre-index with up to 45 gap days" oninput="${onchg('ce_requirement')}"></div>
+    <div class="pgrid-item"><label class="fl">Follow-up Period / Censoring Rule</label>
+      <input class="fi" value="${esc(P.followup)}" placeholder="e.g. index date to event, end of study, or 30 months, whichever first" oninput="${onchg('followup')}"></div>
+  </div>
+  <div style="margin-top:14px;padding:10px 13px;background:#E8F2FA;border-radius:6px;font-size:11px;color:#003D73">
+    <strong>💡 Tip:</strong> For per-protocol (PP) analyses, specify additional censoring 15 days after last treatment discontinuation separately in the algorithm section.
+  </div>`;
+}
+function rOutcomes(){
+  const O=S.outcomes;
+  const onchg=(k)=>`S.outcomes['${k}']=this.value;rPrev()`;
+  return`<div class="sec-sub">Primary & Secondary Outcomes</div>
+  <div class="fg">
+    <div class="fgg s2"><label class="fl">Primary Outcome</label>
+      <textarea class="fi" rows="3" placeholder="e.g. Composite of all-cause death, CV hospitalization (AF, stroke, HF, MI)..." oninput="${onchg('primary_outcome')}">${esc(O.primary_outcome)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Secondary Outcomes</label>
+      <textarea class="fi" rows="3" placeholder="e.g. (1) All-cause death, (2) AF hospitalization alone, (3) Weight change at 6/12/24 months..." oninput="${onchg('secondary_outcomes')}">${esc(O.secondary_outcomes)}</textarea></div>
+  </div>
+  <div class="sec-sub">Treatment Comparisons</div>
+  <div class="fg">
+    <div class="fgg s2"><label class="fl">Treatment Arms (list all pairwise comparisons)</label>
+      <textarea class="fi" rows="3" placeholder="e.g. (1) Overall GLP-1 vs SoC, (2) Tirzepatide vs SoC, (3) Sema vs SoC, (4) TZP+SEMA vs SoC..." oninput="${onchg('treatment_arm')}">${esc(O.treatment_arm)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Treatment Arm Definition</label>
+      <textarea class="fi" rows="3" placeholder="e.g. Treatment group: ≥1 treatment drug Rx during index period. t0 = first Rx date. See codelist." oninput="${onchg('comparator_arm')}">${esc(O.comparator_arm)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Comparator / SoC Definition</label>
+      <textarea class="fi" rows="3" placeholder="e.g. SoC: ≥1 qualifying SoC drug but no treatment drug. t0 = first SoC date. No overlap between groups." oninput="${onchg('treatment_note')}">${esc(O.treatment_note)}</textarea></div>
+  </div>`;
+}
+function rAlgorithm(){
+  const A=S.algorithm;
+  return`<div class="sec-sub">Cohort Construction Algorithm</div>
+  <div class="fgg s2" style="margin-bottom:12px"><label class="fl">Step-by-Step Pseudo Algorithm</label>
+    <textarea class="fi" rows="10" placeholder="Step 1: Identify all subjects with SOC or treatment drug Rx during index period.\nStep 2: Assign treatment arm — subjects with ≥1 treatment drug Rx.\n  Note: Index date = first treatment drug Rx date.\nStep 3: Remaining subjects assigned to SoC arm.\n  Note: Index date = first SoC Rx date.\nStep 4: Apply eligibility criteria at index date for final cohort." oninput="S.algorithm.steps=this.value;rPrev()">${esc(A.steps)}</textarea></div>
+  <div class="sec-sub">Matching / Analysis Strategy Notes</div>
+  <div class="fgg s2"><label class="fl">PSM / Weighting Notes (for analysis)</label>
+    <textarea class="fi" rows="4" placeholder="e.g. 1:1 PSM with greedy nearest-neighbor matching, caliper 0.1 SD of logit PS. Matching variables: age, sex, race, CCI, BMI, comorbidities, baseline medications..." oninput="S.algorithm.notes=this.value">${esc(A.notes)}</textarea></div>`;
+}
+function rNCO(){
+  const N=S.nco;
+  const onchg=(k)=>`S.nco['${k}']=this.value;rPrev()`;
+  return`<div class="sec-sub">Negative Control Outcome Specification</div>
+  <div class="fg">
+    <div class="fgg s2"><label class="fl">NCO Source / Reference File</label>
+      <input class="fi" value="${esc(N.nco_source)}" placeholder="e.g. NCO list_BS_AF.xlsx — use green and yellow highlighted outcomes" oninput="${onchg('nco_source')}"></div>
+    <div class="fgg s2"><label class="fl">Datasets Required</label>
+      <textarea class="fi" rows="3" placeholder="e.g. 4 datasets: (green/yellow) × (ITT/PP) using corresponding follow-up periods" oninput="${onchg('nco_datasets')}">${esc(N.nco_datasets)}</textarea></div>
+    <div class="fgg s2"><label class="fl">NCO Construction Notes</label>
+      <textarea class="fi" rows="3" placeholder="e.g. Construct time-to-event outcome for each NCO. Output: Time_outcomeN and Event_outcomeN variables following same structure as primary outcome." oninput="${onchg('nco_note')}">${esc(N.nco_note)}</textarea></div>
+  </div>
+  <div style="padding:10px 13px;background:#FFF3E0;border:1px solid #FFCC80;border-radius:6px;font-size:11px;color:#E65100;margin-top:12px">
+    <strong>⚠️ NCO Note:</strong> Confirm highlighted tiers (green = primary NCO list, yellow = secondary) from the attached Excel before programming. Four separate output datasets may be required if ITT and PP follow-up differ.
+  </div>`;
+}
+function rConsiderations(){
+  const C=S.considerations;
+  const onchg=(k)=>`S.considerations['${k}']=this.value;rPrev()`;
+  return`<div class="fg">
+    <div class="fgg s2"><label class="fl">Data Sources by Variable Type</label>
+      <textarea class="fi" rows="3" placeholder="e.g. Dx/Rx/procedure: claims only. Weight/labs: EHR + claims_lab_results. Vitals: EHR. Smoking/alcohol: patient table." oninput="${onchg('data_sources_note')}">${esc(C.data_sources_note)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Missing Data / Plausibility Rules</label>
+      <textarea class="fi" rows="3" placeholder="e.g. BMI plausible range: 9–100. HbA1c: 3.5%–20%. Values outside range excluded. 45-day gap allowed for CE and last Rx." oninput="${onchg('missing_data')}">${esc(C.missing_data)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Output Format</label>
+      <textarea class="fi" rows="3" placeholder="e.g. SAS dataset (.sas7bdat) or Excel — one row per patient. Deliver full analytic dataset with all outcome and baseline variables. No need to split into multiple datasets." oninput="${onchg('output_format')}">${esc(C.output_format)}</textarea></div>
+    <div class="fgg s2"><label class="fl">Other Considerations / Special Instructions</label>
+      <textarea class="fi" rows="4" placeholder="e.g. Stockpiling enabled for GLP-1 and TZP (all Zepbound and Mounjaro pooled). Death imputed to 15th of month. Rx of any transaction type allowed. 'Ignore Same Day Fills' off." oninput="${onchg('other_notes')}">${esc(C.other_notes)}</textarea></div>
+  </div>`;
+}
+
+// GENERATE SPEC
+async function generateSpec(){
+  const btn=document.getElementById("btnGen");btn.disabled=true;btn.textContent="⏳ Generating...";
+  S.specOut="";S.showOut=true;rMain();
+  const st=STYPES.find(t=>t.id===S.studyType);
+  const inclText=S.inclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
+  const exclText=S.exclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
+  const feasText=S.feasibility.map(i=>FEAS_OPTS[i]).join("; ")||"Not specified";
+  const varText=S.variables.filter(v=>v.name.trim()).map(v=>`- ${v.name}: ${v.definition}${v.note?" ["+v.note+"]":""}${v.range?" Range: "+v.range:""}`).join("\n")||"Not specified";
+  const prompt=`You are a senior pharmacoepidemiologist at Eli Lilly working on a Real-World Evidence study data specification for the Strada data platform. Generate a complete, professional Strada Data Specification document based on the following inputs. Use formal, precise language appropriate for a data specification submitted to a data programmer.
+
+STRADA PROJECT REQUEST ID: ${S.meta.reqId||"Not specified"}
+REQUESTOR: ${S.meta.requestor||"Not specified"}
+DATA SOURCE: ${S.meta.dataSource||"Not specified"}
+STUDY TYPE: ${st?.label||"Not specified"}
+STUDY TITLE / DESCRIPTION: ${S.meta.title||"Not specified"}
+DATE: ${S.meta.date}
+
+1. OBJECTIVES
+Primary: ${S.overview.objective_primary||"Not specified"}
+Secondary: ${S.overview.objective_secondary||"Not specified"}
+Note: ${S.overview.note||"None"}
+
+2. STUDY PERIODS
+Study Period: ${S.periods.study_period||"Not specified"}
+Index Period: ${S.periods.index_period||"Not specified"}
+Baseline Comorbidity Period: ${S.periods.baseline_comorbidity||"Not specified"}
+Baseline Weight/BMI Period: ${S.periods.baseline_weight||"Not specified"}
+Baseline T2D Period: ${S.periods.baseline_t2d||"Not specified"}
+Index Event: ${S.periods.index_event||"Not specified"}
+Continuous Enrollment: ${S.periods.ce_requirement||"Not specified"}
+Follow-up: ${S.periods.followup||"Not specified"}
+
+3. INCLUSION CRITERIA
+${inclText}
+
+4. EXCLUSION CRITERIA
+${exclText}
+
+5. OUTCOMES & TREATMENT
+Primary Outcome: ${S.outcomes.primary_outcome||"Not specified"}
+Secondary Outcomes: ${S.outcomes.secondary_outcomes||"Not specified"}
+Treatment Arms: ${S.outcomes.treatment_arm||"Not specified"}
+Treatment Definition: ${S.outcomes.comparator_arm||"Not specified"}
+Comparator / SoC Definition: ${S.outcomes.treatment_note||"Not specified"}
+
+6. COHORT ALGORITHM
+${S.algorithm.steps||"Not specified"}
+PSM / Analysis Notes: ${S.algorithm.notes||"Not specified"}
+
+7. FEASIBILITY CHECKS REQUESTED
+${feasText}
+Additional Notes: ${S.overview.feasNotes||"None"}
+
+8. VARIABLE DEFINITIONS (key variables)
+${varText}
+
+9. NEGATIVE CONTROL OUTCOMES
+NCO Source: ${S.nco.nco_source||"Not specified"}
+Datasets Required: ${S.nco.nco_datasets||"Not specified"}
+NCO Notes: ${S.nco.nco_note||"Not specified"}
+
+10. OTHER CONSIDERATIONS
+Data Sources by Type: ${S.considerations.data_sources_note||"Not specified"}
+Missing Data / Plausibility: ${S.considerations.missing_data||"Not specified"}
+Output Format: ${S.considerations.output_format||"Not specified"}
+Other Notes: ${S.considerations.other_notes||"Not specified"}
+
+Generate the complete Strada Data Specification document with:
+- Header block (Project ID, Requestor, Data Source, Study Note)
+- Section 1: Objectives
+- Section 2: Study Details (all periods, inclusion/exclusion, outcomes, treatment comparisons)
+- Section 3: Pseudo Algorithm
+- Section 4: Design summary
+- Section 5: Feasibility Checks
+- Section 6: Negative Control Outcomes
+- Section 7: Variable Definitions (present as a clearly structured list)
+- Section 8: Other Considerations
+
+Be specific and precise. Where information is missing, note it as "[TO BE SPECIFIED]". Flag any methodological concerns as ⚠️ WARNING. Use numbered lists for criteria.`;
+
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    S.specOut=data.content?.map(b=>b.text||"").join("")||"No response.";
+  }catch(err){S.specOut="Error: "+err.message;}
+  btn.disabled=false;btn.textContent="✨ Generate Data Spec";
+  const bt=document.getElementById("btnTog");bt.style.display="";bt.textContent="Hide Output";
+  document.getElementById("btnExp").style.display="";
+  S.showOut=true;rMain();
+}
+function toggleOutput(){S.showOut=!S.showOut;const bt=document.getElementById("btnTog");bt.textContent=S.showOut?"Hide Output":"Show Output";rMain();}
+
+// EXPORT
+function exportToWord(){
+  const st=STYPES.find(t=>t.id===S.studyType);
+  const ds=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  let hb="";
+  S.specOut.split("\n").forEach(line=>{const t=line.trim();if(!t){hb+="<p>&nbsp;</p>";return;}
+    if(/^\d+\.\s+[A-Z]/.test(t)||/^#{1,2}\s/.test(t))hb+=`<h2>${t.replace(/^#+\s*/,"")}</h2>`;
+    else if(/^#{3}\s/.test(t)||/^\*\*(.+)\*\*$/.test(t))hb+=`<h3>${t.replace(/^#+\s*|\*\*/g,"")}</h3>`;
+    else if(/^[-•]\s/.test(t))hb+=`<li>${t.replace(/^[-•]\s/,"")}</li>`;
+    else if(/^\d+\)\s/.test(t))hb+=`<li>${t}</li>`;
+    else hb+=`<p>${t}</p>`;
+  });
+  const inclRows=S.inclusion.filter(v=>v.trim()).map((v,i)=>`<li>${i+1}) ${v}</li>`).join("");
+  const exclRows=S.exclusion.filter(v=>v.trim()).map((v,i)=>`<li>${i+1}) ${v}</li>`).join("");
+  const varRows=S.variables.filter(v=>v.name.trim()).map((v,i)=>`<tr style="background:${i%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:130pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#666">${v.note||""}</td><td style="padding:5pt 8pt;color:#555">${v.range||""}</td></tr>`).join("");
+  const feasItems=S.feasibility.map(i=>`<li>${FEAS_OPTS[i]}</li>`).join("");
+
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset='utf-8'><title>Data Spec — ${S.meta.title||"Study"}</title>
+<style>
+@page{size:8.5in 11in;margin:1in}
+body{font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;color:#222}
+h1{font-size:16pt;color:#003D73;border-bottom:2pt solid #003D73;padding-bottom:6pt;margin-bottom:12pt}
+h2{font-size:12pt;color:#003D73;margin-top:18pt;margin-bottom:6pt;border-left:4pt solid #0060A9;padding-left:8pt}
+h3{font-size:11pt;color:#0060A9;margin-top:12pt;font-weight:bold}
+p,li{margin:3pt 0 7pt 0}
+table{border-collapse:collapse;width:100%}
+.ct td{padding:5pt 10pt;vertical-align:top}
+.vt th{background:#003D73;color:#fff;padding:5pt 8pt;text-align:left}
+.vt td{border:1pt solid #D1E3F3;padding:5pt 8pt;vertical-align:top}
+.ft{font-size:9pt;color:#999;border-top:1pt solid #ddd;padding-top:6pt;margin-top:24pt}
+.note-box{background:#EBF4FB;border:1pt solid #C8DDF0;padding:8pt;margin:10pt 0;font-size:10pt}
+</style></head><body>
+
+<h1>Strada Data Specification</h1>
+<p style="font-size:10pt;color:#666;font-style:italic">The following Specification document collects business requirements for a Strada RWE data request. Please review and work with your RWE Scientists to complete this form.</p>
+
+<table class="ct" style="border:1pt solid #D1E3F3;margin-bottom:16pt">
+<tr style="background:#003D73"><td colspan="2" style="color:#fff;font-weight:bold;padding:7pt 10pt;font-size:12pt">Request Summary</td></tr>
+<tr><td style="font-weight:bold;color:#003D73;width:160pt">Project Request ID</td><td>${S.meta.reqId||"—"}</td></tr>
+<tr style="background:#F5F8FC"><td style="font-weight:bold;color:#003D73">Study Title</td><td>${S.meta.title||"—"}</td></tr>
+<tr><td style="font-weight:bold;color:#003D73">Requestor</td><td>${S.meta.requestor||"—"}</td></tr>
+<tr style="background:#F5F8FC"><td style="font-weight:bold;color:#003D73">Data Source</td><td>${S.meta.dataSource||"—"}</td></tr>
+<tr><td style="font-weight:bold;color:#003D73">Study Type</td><td>${st?.icon||""} ${st?.label||"—"}</td></tr>
+<tr style="background:#F5F8FC"><td style="font-weight:bold;color:#003D73">Date</td><td>${S.meta.date||"—"}</td></tr>
+<tr><td style="font-weight:bold;color:#003D73">Export Date</td><td>${ds}</td></tr>
+</table>
+
+${S.overview.note?`<div class="note-box"><strong>Note:</strong> ${S.overview.note}</div>`:""}
+
+<h2>1. Objectives</h2>
+<p><strong>Primary Objective:</strong> ${S.outcomes.primary_outcome?`Effect of ${S.outcomes.treatment_arm||"[Treatment]"} on ${S.outcomes.primary_outcome||"[Outcome]"}`:S.overview.objective_primary||"[TO BE SPECIFIED]"}</p>
+${S.overview.objective_secondary?`<p><strong>Secondary Objective(s):</strong> ${S.overview.objective_secondary}</p>`:""}
+
+<h2>2. Study Details</h2>
+<h3>Study Periods</h3>
+<table class="ct" style="border:1pt solid #D1E3F3">
+${[["Study Period",S.periods.study_period],["Index Period",S.periods.index_period],["Baseline Comorbidity Period",S.periods.baseline_comorbidity],["Baseline Weight/BMI Period",S.periods.baseline_weight],["Baseline T2D/Lab Period",S.periods.baseline_t2d],["Index Event",S.periods.index_event],["Continuous Enrollment",S.periods.ce_requirement],["Follow-up Period",S.periods.followup]].map(([k,v],i)=>`<tr style="background:${i%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;width:180pt;padding:5pt 10pt">${k}</td><td style="padding:5pt 10pt">${v||"[TO BE SPECIFIED]"}</td></tr>`).join("")}
+</table>
+
+<h3>Inclusion Criteria</h3>
+${inclRows?`<ol>${inclRows}</ol>`:"<p>[TO BE SPECIFIED]</p>"}
+
+<h3>Exclusion Criteria</h3>
+${exclRows?`<ol>${exclRows}</ol>`:"<p>[TO BE SPECIFIED]</p>"}
+
+<h3>Study Outcomes</h3>
+<p><strong>Primary:</strong> ${S.outcomes.primary_outcome||"[TO BE SPECIFIED]"}</p>
+${S.outcomes.secondary_outcomes?`<p><strong>Secondary:</strong> ${S.outcomes.secondary_outcomes}</p>`:""}
+
+<h3>Treatment Comparisons</h3>
+<p>${S.outcomes.treatment_arm||"[TO BE SPECIFIED]"}</p>
+${S.outcomes.comparator_arm?`<p><strong>Treatment Definition:</strong> ${S.outcomes.comparator_arm}</p>`:""}
+${S.outcomes.treatment_note?`<p><strong>Comparator / SoC Definition:</strong> ${S.outcomes.treatment_note}</p>`:""}
+
+<h2>3. Pseudo Algorithm</h2>
+<pre style="font-family:Arial;font-size:10pt;white-space:pre-wrap;background:#F5F8FC;padding:10pt;border:1pt solid #D1E3F3">${S.algorithm.steps||"[TO BE SPECIFIED]"}</pre>
+${S.algorithm.notes?`<h3>PSM / Analysis Notes</h3><p>${S.algorithm.notes}</p>`:""}
+
+<h2>4. Feasibility Checks</h2>
+${feasItems?`<ol>${feasItems}</ol>`:"<p>[TO BE SPECIFIED]</p>"}
+${S.overview.feasNotes?`<p>${S.overview.feasNotes}</p>`:""}
+
+<h2>5. Negative Control Outcomes</h2>
+<p><strong>NCO Source:</strong> ${S.nco.nco_source||"[TO BE SPECIFIED]"}</p>
+${S.nco.nco_datasets?`<p><strong>Datasets Required:</strong> ${S.nco.nco_datasets}</p>`:""}
+${S.nco.nco_note?`<p>${S.nco.nco_note}</p>`:""}
+
+<h2>6. Variable Definitions</h2>
+${varRows?`<table class="vt"><tr><th style="width:130pt">Variable Name</th><th>Definition</th><th>Note / Source</th><th style="width:100pt">Plausible Range</th></tr>${varRows}</table>`:"<p>[TO BE SPECIFIED — use 'Load Common Variables' in builder]</p>"}
+
+<h2>7. Other Considerations</h2>
+${S.considerations.data_sources_note?`<p><strong>Data Sources by Variable Type:</strong> ${S.considerations.data_sources_note}</p>`:""}
+${S.considerations.missing_data?`<p><strong>Plausible Ranges / Missing Data:</strong> ${S.considerations.missing_data}</p>`:""}
+${S.considerations.output_format?`<p><strong>Output Format:</strong> ${S.considerations.output_format}</p>`:""}
+${S.considerations.other_notes?`<p><strong>Additional Notes:</strong><br>${S.considerations.other_notes.split("\n").join("<br>")}</p>`:""}
+
+${S.specOut?`<h2>8. AI-Generated Narrative (Generated Section)</h2><div style="background:#F8F0FF;border:1pt solid #CE93D8;padding:12pt;font-size:10.5pt;line-height:1.7">${hb}</div>`:""}
+
+<div class="ft">
+<p>Generated by Data Spec Builder · Eli Lilly SDIA · ${ds}</p>
+<p><em>Review all content before submission to Strada / data programmers.</em></p>
+</div>
+</body></html>`;
+
+  const blob=new Blob([html],{type:"application/msword;charset=utf-8"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download=`DataSpec_${(S.meta.reqId||S.meta.title||"Study").replace(/\s+/g,"_")}_${S.meta.date||"draft"}.doc`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// MAIN RENDER
+function rMain(){
+  const el=document.getElementById("main");
+  if(S.showOut&&S.specOut){
+    el.innerHTML=`<div class="sout-hdr"><h2 style="font-size:18px;color:#003D73;margin:0">Generated Data Specification</h2><button class="bp" onclick="S.showOut=false;rMain()">← Back to Editor</button><div style="flex:1"></div><button class="btn-grn" onclick="exportToWord()">📄 Export to Word (.doc)</button></div><div class="sout-body">${esc(S.specOut)}</div>`;
+    return;
+  }
+  if(!S.studyType){el.innerHTML=`<div class="es"><div style="font-size:32px">📋</div><div style="font-size:14px;color:#aaa">Select a request type above to begin</div></div>`;return;}
+  const sec=S.activeSection;
+  const skeys=Object.keys(SECS);
+  const idx=skeys.indexOf(sec);
+  const secInfo=SECS[sec];
+  let cont="";
+  if(sec==="overview")cont=rOverview();
+  else if(sec==="periods")cont=rPeriods();
+  else if(sec==="inclusion")cont=`<div class="sec-sub">Inclusion Criteria</div>${rCriteria("inclusion","#0060A9")}`;
+  else if(sec==="exclusion")cont=`<div class="sec-sub">Exclusion Criteria</div>${rCriteria("exclusion","#C62828")}`;
+  else if(sec==="outcomes")cont=rOutcomes();
+  else if(sec==="algorithm")cont=rAlgorithm();
+  else if(sec==="feasibility")cont=rFeas();
+  else if(sec==="variables")cont=rVarTable();
+  else if(sec==="nco")cont=rNCO();
+  else if(sec==="considerations")cont=rConsiderations();
+
+  // AI suggestion for algorithm section
+  let aiPanel="";
+  if(sec==="algorithm"){
+    aiPanel=`<div class="suggest-divider">
+      <div class="suggest-row">
+        <button class="btn-sug" id="btnSugAlg" onclick="suggestAlgorithm()" ${S.generating?"disabled":""}>
+          ${S.generating?`<span class="spin">⏳</span> Generating...`:"🤖 Suggest Cohort Algorithm"}
+        </button>
+        <div style="font-size:11px;color:#888">Claude drafts a step-by-step cohort algorithm based on your study design inputs</div>
+      </div>
+    </div>
+    ${S.algSug||S.generating?`<div class="sugpanel"><div class="sugpt">🤖 AI-Suggested Cohort Algorithm</div><div class="sugout">${S.generating?"<span class='spin'>⏳</span> Drafting algorithm...":esc(S.algSug)}</div></div>`:""}`;
+  }
+
+  el.innerHTML=`<div class="sh"><span class="si">${secInfo.icon}</span><h2 class="st2">${secInfo.label}</h2></div>
+  <div class="scard">${cont}${aiPanel||""}</div>
+  <div class="nav-acts">
+    <button class="bp" ${idx===0?"disabled":""} onclick="goSec('${skeys[idx-1]||""}')">← Previous</button>
+    <button class="bn" ${idx===skeys.length-1?"disabled":""} onclick="goSec('${skeys[idx+1]||""}')">Next →</button>
+  </div>`;
+}
+
+// AI SUGGEST ALGORITHM
+async function suggestAlgorithm(){
+  S.generating=true;S.algSug="";rMain();
+  const st=STYPES.find(t=>t.id===S.studyType);
+  const inclText=S.inclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not yet specified";
+  const exclText=S.exclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not yet specified";
+  const prompt=`You are a senior pharmacoepidemiologist at Eli Lilly. Draft a clear, step-by-step cohort construction algorithm for a Strada data specification.
+
+Study Type: ${st?.label||"RWE"}
+Study Title: ${S.meta.title||"Not specified"}
+Data Source: ${S.meta.dataSource||"Not specified"}
+Primary Outcome: ${S.outcomes.primary_outcome||"Not specified"}
+Treatment Arms: ${S.outcomes.treatment_arm||"Not specified"}
+Treatment Definition: ${S.outcomes.comparator_arm||"Not specified"}
+Comparator Definition: ${S.outcomes.treatment_note||"Not specified"}
+Study Period: ${S.periods.study_period||"Not specified"}
+Index Period: ${S.periods.index_period||"Not specified"}
+Follow-up: ${S.periods.followup||"Not specified"}
+Inclusion Criteria:
+${inclText}
+Exclusion Criteria:
+${exclText}
+
+Generate a numbered pseudo-algorithm (Step 1, Step 2, etc.) for cohort construction. Include:
+1. Initial patient pool selection
+2. Treatment/comparator group assignment
+3. Index date definition for each arm
+4. Eligibility criteria application
+5. Follow-up period and censoring
+6. Any study-specific notes
+
+Be concise and precise. Use language appropriate for a data programmer.`;
+
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})});
+    const data=await res.json();
+    S.algSug=data.content?.map(b=>b.text||"").join("")||"No response.";
+  }catch(err){S.algSug="Error: "+err.message;}
+  S.generating=false;rMain();
+}
+
+// PREVIEW
+function rPrev(){
+  const el=document.getElementById("prev");
+  const st=STYPES.find(t=>t.id===S.studyType);
+  const totalSecs=Object.keys(SECS).length;
+  const filledSecs=Object.keys(SECS).filter(k=>secComp(k)>0).length;
+  const cp=p(filledSecs,totalSecs);
+
+  const warns=[
+    !S.studyType&&"Study type not selected",
+    !S.meta.reqId&&"Strada Request ID missing",
+    !S.meta.requestor&&"Requestor name missing",
+    !S.overview.objective_primary&&"Primary objective not specified",
+    !S.periods.study_period&&"Study period not defined",
+    !S.periods.followup&&"Follow-up rule not defined",
+    S.inclusion.filter(v=>v.trim()).length===0&&"No inclusion criteria added",
+    S.exclusion.filter(v=>v.trim()).length===0&&"No exclusion criteria added",
+    !S.outcomes.primary_outcome&&"Primary outcome not specified",
+    !S.algorithm.steps&&"Cohort algorithm not specified",
+    S.variables.length===0&&"No variable definitions — use 'Load Common Variables'",
+  ].filter(Boolean);
+
+  let h=`<div class="pvt">Spec Preview</div>`;
+  if(st)h+=`<div style="background:${st.bg};border:1px solid ${st.color}40;border-radius:6px;padding:7px 9px;margin-bottom:11px"><div style="font-size:11px;font-weight:800;color:${st.color}">${st.icon} ${st.label}</div></div>`;
+  if(S.meta.reqId)h+=`<div class="pvs"><div class="pvl">Request ID</div><div style="color:#0060A9;font-size:11px;font-weight:700">${esc(S.meta.reqId)}</div></div>`;
+  if(S.meta.title)h+=`<div class="pvs"><div class="pvl">Study</div><div style="color:#222;font-size:11px">${esc(S.meta.title)}</div></div>`;
+  if(S.meta.dataSource)h+=`<div class="pvs"><div class="pvl">Data Source</div><div class="pvv">📁 ${esc(S.meta.dataSource)}</div></div>`;
+  h+=`<div class="pvs"><div class="pvl">Sections Filled</div><div class="pbw"><div class="pbf" style="width:${cp}%;background:${warnC(cp)}"></div></div><div style="color:${warnC(cp)};font-weight:700">${cp}% (${filledSecs}/${totalSecs})</div></div>`;
+  if(S.inclusion.filter(v=>v.trim()).length>0)h+=`<div class="pvs"><div class="pvl">Inclusion Criteria</div><div class="pvv">${S.inclusion.filter(v=>v.trim()).length} criteria</div></div>`;
+  if(S.exclusion.filter(v=>v.trim()).length>0)h+=`<div class="pvs"><div class="pvl">Exclusion Criteria</div><div class="pvv">${S.exclusion.filter(v=>v.trim()).length} criteria</div></div>`;
+  if(S.variables.length>0)h+=`<div class="pvs"><div class="pvl">Variables</div><div class="pvv">${S.variables.filter(v=>v.name.trim()).length} defined</div></div>`;
+  if(S.feasibility.length>0)h+=`<div class="pvs"><div class="pvl">Feasibility Checks</div><div class="pvv">${S.feasibility.length} selected</div></div>`;
+  if(S.periods.study_period)h+=`<div class="pvs"><div class="pvl">Study Period</div><div class="pvv">${esc(S.periods.study_period)}</div></div>`;
+  if(S.outcomes.primary_outcome)h+=`<div class="pvs"><div class="pvl">Primary Outcome</div><div class="pvv">${esc(S.outcomes.primary_outcome.substring(0,60))}${S.outcomes.primary_outcome.length>60?"...":""}</div></div>`;
+
+  const vbg=warns.length?"#FFEBEE":"#E8F5E9";const vc=warns.length?CL.R:CL.G;
+  h+=`<div class="vbox" style="background:${vbg}"><div class="vt" style="color:${vc}">${warns.length?`❌ ${warns.length} item${warns.length>1?"s":""} missing`:"✓ Ready to generate"}</div>${warns.map(w=>`<div class="vi" style="color:${CL.R}">• ${w}</div>`).join("")}</div>`;
+  el.innerHTML=h;
+}
+
+// INIT
+rStypes();rNav();rMain();rPrev();
+</script>
+</body>
+</html>
