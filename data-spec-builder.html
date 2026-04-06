@@ -254,6 +254,7 @@ const VAR_CATS=["ID","Dates","Treatment","Outcomes","Demographics","Lab Values",
 function rVarTable(){
   let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
     <span style="font-size:12px;font-weight:700;color:#003D73">Variable Definitions Table</span>
+    <select id="varCatSel" class="fi" style="width:180px;padding:5px 8px;font-size:12px" onchange="S._varCat=this.value"><option value="" disabled ${S._varCat?"":"selected"}>Select category…</option>${VAR_CATS.map(c=>`<option value="${c}"${S._varCat===c?" selected":""}>${c}</option>`).join("")}</select>
     <button class="add-btn" style="margin:0" onclick="addVar()">+ Add Variable</button>
     <button class="add-btn" style="margin:0;border-color:#A5D6A7;color:#2E7D32" onclick="addDefaultVars()">📋 Load Common Variables</button>
   </div>
@@ -276,7 +277,14 @@ function rVarTable(){
   h+=`</table>`;
   return h;
 }
-function addVar(){S.variables.push({name:"",definition:"",note:"",range:"",cat:"Other"});rMain();}
+function addVar(){
+  const cat=S._varCat||VAR_CATS[0];
+  const newVar={name:"",definition:"",note:"",range:"",cat:cat};
+  const lastIdx=S.variables.map((v,i)=>v.cat===cat?i:-1).filter(i=>i>=0);
+  if(lastIdx.length>0)S.variables.splice(lastIdx[lastIdx.length-1]+1,0,newVar);
+  else S.variables.push(newVar);
+  rMain();
+}
 function delVar(i){S.variables.splice(i,1);rMain();}
 function addDefaultVars(){
   const defaults=[
