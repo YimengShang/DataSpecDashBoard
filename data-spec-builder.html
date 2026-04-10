@@ -164,8 +164,8 @@ const SECS={
 
 // STATE
 const S={
-  studyType:"",
-  activeSection:"overview",
+  studyType:"comparative",
+  activeSection:"variables",
   meta:{reqId:"",title:"",requestor:"",dataSource:"",date:new Date().toISOString().split("T")[0]},
   // overview
   overview:{objective_primary:"",objective_secondary:"",note:""},
@@ -180,7 +180,7 @@ const S={
   algorithm:{steps:"",notes:""},
   // feasibility checks (toggled list)
   feasibility:[],
-  // variables: array of {name, definition, note, range}
+  // variables: array of {name, definition, type, note, codelist, range}
   variables:[],
   // nco
   nco:{nco_source:"",nco_note:"",nco_datasets:""},
@@ -201,11 +201,20 @@ function rStypes(){
   const el=document.getElementById("stgrid");
   el.innerHTML=STYPES.map(t=>{
     const isSel=S.studyType===t.id;
-    return`<button class="st-card${isSel?" act":""}" style="--c:${t.color};${isSel?`background:${t.bg};`:""};border-color:${isSel?t.color:"#D1E3F3"}" onclick="pickST('${t.id}')">
-      <div class="st-icon">${t.icon}</div>
-      <div class="st-name">${t.label}</div>
-      <div class="st-desc">${t.desc}</div>
-      ${isSel?`<div style="margin-top:6px"><span class="badge b-blue">Active</span></div>`:""}
+    const isAvail=t.id==="comparative";
+    if(isAvail){
+      return`<button class="st-card${isSel?" act":""}" style="--c:${t.color};${isSel?`background:${t.bg};`:""};border-color:${isSel?t.color:"#D1E3F3"}" onclick="pickST('${t.id}')">
+        <div class="st-icon">${t.icon}</div>
+        <div class="st-name">${t.label}</div>
+        <div class="st-desc">${t.desc}</div>
+        ${isSel?`<div style="margin-top:6px"><span class="badge b-blue">Active</span></div>`:""}
+      </button>`;
+    }
+    return`<button class="st-card" style="--c:#999;background:#F0F0F0;border-color:#D8D8D8;cursor:not-allowed;opacity:0.55" disabled>
+      <div class="st-icon" style="filter:grayscale(1)">${t.icon}</div>
+      <div class="st-name" style="color:#888">${t.label}</div>
+      <div class="st-desc" style="color:#aaa">${t.desc}</div>
+      <div style="margin-top:6px"><span class="badge" style="background:#E0E0E0;color:#888">🚧 Under Development</span></div>
     </button>`;
   }).join("");
 }
@@ -250,7 +259,7 @@ function addCrit(k){S[k].push("");rMain();}
 function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
 
 // VARIABLE TABLE
-const VAR_CATS=["ID","Dates","Treatment","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
+const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
 function rVarTable(){
   let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
     <span style="font-size:12px;font-weight:700;color:#003D73">Variable Definitions Table</span>
@@ -259,18 +268,22 @@ function rVarTable(){
     <button class="add-btn" style="margin:0;border-color:#A5D6A7;color:#2E7D32" onclick="addDefaultVars()">📋 Load Common Variables</button>
   </div>
   <table class="vtbl">
-    <tr><th style="width:140px">Variable Name</th><th>Definition</th><th style="width:110px">Plausible Range</th><th>Note / Source</th><th style="width:30px"></th></tr>`;
+    <tr><th style="width:130px">Variable Name</th><th>Definition</th><th style="width:110px">Variable Type</th><th style="width:105px">Plausible Range</th><th>Note</th><th>Codelist</th><th style="width:30px"></th></tr>`;
   let lastCat=null;
+  const VAR_TYPES=["Continuous","Binary","Categorical","Date","ID","Other"];
   S.variables.forEach((v,i)=>{
     if(v.cat!==lastCat){
       lastCat=v.cat;
-      h+=`<tr><td colspan="5" style="background:#E8F2FA;color:#003D73;font-weight:700;font-size:11px;padding:5px 8px;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;
+      h+=`<tr><td colspan="7" style="background:#E8F2FA;color:#003D73;font-weight:700;font-size:11px;padding:5px 8px;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;
     }
+    const showRange=(v.type||"")==="Continuous" && v.cat!=="Outcomes";
     h+=`<tr>
       <td><input value="${esc(v.name)}" placeholder="var_name" oninput="S.variables[${i}].name=this.value;rPrev()"></td>
       <td><input value="${esc(v.definition)}" placeholder="Definition..." oninput="S.variables[${i}].definition=this.value"></td>
-      <td><input value="${esc(v.range)}" placeholder="e.g. 9–100" oninput="S.variables[${i}].range=this.value"></td>
-      <td><input value="${esc(v.note)}" placeholder="Source / note..." oninput="S.variables[${i}].note=this.value"></td>
+      <td><select oninput="S.variables[${i}].type=this.value;rMain()"><option value="" disabled ${v.type?"":"selected"}>Select…</option>${VAR_TYPES.map(t=>`<option value="${t}"${v.type===t?" selected":""}>${t}</option>`).join("")}</select></td>
+      <td>${showRange?`<input value="${esc(v.range)}" placeholder="e.g. 9–100" oninput="S.variables[${i}].range=this.value">`:`<span style="color:#bbb;font-size:11px;padding:4px 7px;display:block">—</span>`}</td>
+      <td><input value="${esc(v.note)}" placeholder="Note..." oninput="S.variables[${i}].note=this.value"></td>
+      <td><input value="${esc(v.codelist)}" placeholder="Codelist..." oninput="S.variables[${i}].codelist=this.value"></td>
       <td><button class="del-var" onclick="delVar(${i})" title="Delete">×</button></td>
     </tr>`;
   });
@@ -279,7 +292,7 @@ function rVarTable(){
 }
 function addVar(){
   const cat=S._varCat||VAR_CATS[0];
-  const newVar={name:"",definition:"",note:"",range:"",cat:cat};
+  const newVar={name:"",definition:"",type:"",note:"",codelist:"",range:"",cat:cat};
   const lastIdx=S.variables.map((v,i)=>v.cat===cat?i:-1).filter(i=>i>=0);
   if(lastIdx.length>0)S.variables.splice(lastIdx[lastIdx.length-1]+1,0,newVar);
   else S.variables.push(newVar);
@@ -288,28 +301,30 @@ function addVar(){
 function delVar(i){S.variables.splice(i,1);rMain();}
 function addDefaultVars(){
   const defaults=[
-    {name:"PATID",definition:"Patient ID",note:"",range:"",cat:"ID"},
-    {name:"IndexDate",definition:"First qualifying treatment/event date during index period",note:"",range:"",cat:"Dates"},
-    {name:"LastDrugDate",definition:"Date of last day on index drug",note:"",range:"",cat:"Dates"},
-    {name:"LastFollowupDate",definition:"Min of: discontinuation, death, end of data, end of max follow-up",note:"",range:"",cat:"Dates"},
-    {name:"Intervention",definition:"Treatment drug or SoC",note:"",range:"",cat:"Treatment"},
-    {name:"Comparator",definition:"Treatment drug or SoC",note:"",range:"",cat:"Treatment"},
-    {name:"Time_outcome1",definition:"Time from index to first outcome event",note:"",range:"",cat:"Outcomes"},
-    {name:"Event_outcome1",definition:"1 = event occurred, 0 = censored",note:"",range:"",cat:"Outcomes"},
-    {name:"Age",definition:"Age at index date",note:"",range:"18–120",cat:"Demographics"},
-    {name:"Sex",definition:"Sex at index date",note:"",range:"",cat:"Demographics"},
-    {name:"Race",definition:"Race (Missing as category)",note:"",range:"",cat:"Demographics"},
-    {name:"Ethnicity",definition:"Hispanic or non-Hispanic (Missing as category)",note:"",range:"",cat:"Demographics"},
-    {name:"Region",definition:"US region (Missing as category)",note:"",range:"",cat:"Demographics"},
-    {name:"Payor",definition:"Commercial or Medicare or missing",note:"",range:"",cat:"Demographics"},
-    {name:"BMI",definition:"Value of BMI record in baseline BMI period, or missing",note:"",range:"9–100",cat:"Lab Values"},
-    {name:"Date_BMI",definition:"Date of the BMI record",note:"",range:"",cat:"Lab Values"},
-    {name:"HBA1C",definition:"Value of HbA1c lab record in baseline period, or missing",note:"",range:"3.5%–20%",cat:"Lab Values"},
-    {name:"CCI",definition:"Baseline Charlson Comorbidity Index score",note:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"T2D",definition:"Yes/No in baseline T2D period",note:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"Hypertension",definition:"Yes/No in baseline period",note:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"Hyperlipidemia",definition:"Yes/No in baseline period",note:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"CHA2DS2VASc_score",definition:"Numeric CHA₂DS₂-VASc score from component variables",note:"",range:"0–9",cat:"Clinical / Comorbidities"},
+    {name:"PATID",definition:"Patient ID",type:"ID",note:"",codelist:"",range:"",cat:"ID"},
+    {name:"Intervention",definition:"",type:"Categorical",note:"",codelist:"",range:"",cat:"Treatment"},
+    {name:"Comparator",definition:"",type:"Categorical",note:"",codelist:"",range:"",cat:"Treatment"},
+    {name:"IndexDate",definition:"First qualifying treatment/event date during index period",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
+    {name:"LastDrugDate",definition:"Date of last day on index drug",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
+    {name:"LastFollowupDate",definition:"Min of: discontinuation, death, end of data, end of max follow-up",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
+    {name:"Time_outcome1",definition:"Time from index to first outcome event",type:"Continuous",note:"",codelist:"",range:"",cat:"Outcomes"},
+    {name:"Event_outcome1",definition:"1 = event occurred, 0 = censored",type:"Binary",note:"",codelist:"",range:"",cat:"Outcomes"},
+    {name:"Age",definition:"Age at index date",type:"Continuous",note:"",codelist:"",range:"18–120",cat:"Demographics"},
+    {name:"Sex",definition:"Sex at index date",type:"Binary",note:"",codelist:"",range:"",cat:"Demographics"},
+    {name:"Race",definition:"Race",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
+    {name:"Ethnicity",definition:"Hispanic or non-Hispanic",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
+    {name:"Region",definition:"US region",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
+    {name:"Payor",definition:"Commercial or Medicare or missing",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
+    {name:"BMI",definition:"Value of BMI record in baseline BMI period, or missing",type:"Continuous",note:"",codelist:"",range:"9–100",cat:"Lab Values"},
+    {name:"HBA1C",definition:"Value of HbA1c lab record in baseline period, or missing",type:"Continuous",note:"",codelist:"",range:"3.5–20",cat:"Lab Values"},
+    {name:"CCI",definition:"Baseline Charlson Comorbidity Index score",type:"Continuous",note:"",codelist:"",range:"0–37",cat:"Clinical / Comorbidities"},
+    {name:"T2D",definition:"Yes/No in baseline T2D period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hypertension",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hyperlipidemia",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
+    {name:"Obesity_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
+    {name:"Diabetic_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
+    {name:"Statin",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
+    {name:"Anticoagulants",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
   ];
   S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
   rMain();rPrev();
@@ -438,7 +453,7 @@ async function generateSpec(){
   const inclText=S.inclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
   const exclText=S.exclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
   const feasText=S.feasibility.map(i=>FEAS_OPTS[i]).join("; ")||"Not specified";
-  const varText=S.variables.filter(v=>v.name.trim()).map(v=>`- ${v.name}: ${v.definition}${v.note?" ["+v.note+"]":""}${v.range?" Range: "+v.range:""}`).join("\n")||"Not specified";
+  const varText=S.variables.filter(v=>v.name.trim()).map(v=>`- ${v.name} [${v.type||"Unknown type"}]: ${v.definition}${v.type==="Continuous"&&v.cat!=="Outcomes"&&v.range?" Range: "+v.range:""}${v.note?" Note: "+v.note:""}${v.codelist?" Codelist: "+v.codelist:""}`).join("\n")||"Not specified";
   const prompt=`You are a senior pharmacoepidemiologist at Eli Lilly working on a Real-World Evidence study data specification for the Strada data platform. Generate a complete, professional Strada Data Specification document based on the following inputs. Use formal, precise language appropriate for a data specification submitted to a data programmer.
 
 STRADA PROJECT REQUEST ID: ${S.meta.reqId||"Not specified"}
@@ -540,8 +555,9 @@ function exportToWord(){
   let _lastCat=null,_ri=0;
   const varRows=S.variables.filter(v=>v.name.trim()).map(v=>{
     let row="";
-    if(v.cat!==_lastCat){_lastCat=v.cat;row+=`<tr><td colspan="4" style="background:#E8F2FA;color:#003D73;font-weight:bold;padding:4pt 8pt;font-size:9pt;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;_ri=0;}
-    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:130pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:100pt">${v.range||""}</td><td style="padding:5pt 8pt;color:#666">${v.note||""}</td></tr>`;
+    if(v.cat!==_lastCat){_lastCat=v.cat;row+=`<tr><td colspan="6" style="background:#E8F2FA;color:#003D73;font-weight:bold;padding:4pt 8pt;font-size:9pt;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;_ri=0;}
+    const showRange=(v.type||"")==="Continuous" && v.cat!=="Outcomes";
+    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:110pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:80pt">${v.type||""}</td><td style="padding:5pt 8pt;color:#555;width:70pt">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.note||""}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.codelist||""}</td></tr>`;
     _ri++;return row;
   }).join("");
   const feasItems=S.feasibility.map(i=>`<li>${FEAS_OPTS[i]}</li>`).join("");
@@ -618,7 +634,7 @@ ${S.nco.nco_datasets?`<p><strong>Datasets Required:</strong> ${S.nco.nco_dataset
 ${S.nco.nco_note?`<p>${S.nco.nco_note}</p>`:""}
 
 <h2>6. Variable Definitions</h2>
-${varRows?`<table class="vt"><tr><th style="width:130pt">Variable Name</th><th>Definition</th><th style="width:100pt">Plausible Range</th><th>Note / Source</th></tr>${varRows}</table>`:"<p>[TO BE SPECIFIED — use 'Load Common Variables' in builder]</p>"}
+${varRows?`<table class="vt"><tr><th style="width:110pt">Variable Name</th><th>Definition</th><th style="width:80pt">Variable Type</th><th style="width:70pt">Plausible Range</th><th style="width:90pt">Note</th><th style="width:90pt">Codelist</th></tr>${varRows}</table>`:"<p>[TO BE SPECIFIED — use 'Load Common Variables' in builder]</p>"}
 
 <h2>7. Other Considerations</h2>
 ${S.considerations.data_sources_note?`<p><strong>Data Sources by Variable Type:</strong> ${S.considerations.data_sources_note}</p>`:""}
@@ -768,6 +784,7 @@ function rPrev(){
 }
 
 // INIT
+document.getElementById("btnGen").disabled=false;
 rStypes();rNav();rMain();rPrev();
 </script>
 <footer style="text-align:center;padding:16px;color:#666;font-size:12px;border-top:1px solid #ddd;margin-top:24px">
