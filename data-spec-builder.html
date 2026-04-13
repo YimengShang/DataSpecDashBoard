@@ -186,6 +186,8 @@ const S={
   nco:{nco_source:"",nco_note:"",nco_datasets:""},
   // considerations
   considerations:{missing_data:"",data_sources_note:"",output_format:"",other_notes:""},
+  // codelists (keyed by filename)
+  codelists:{},
   // output
   specOut:"",showOut:false,generating:false,
 };
@@ -260,12 +262,23 @@ function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
 
 // VARIABLE TABLE
 const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
+function rCodelistCell(v,i){
+  const clKeys=Object.keys(S.codelists);
+  if(clKeys.length===0)return`<input value="${esc(v.codelist)}" placeholder="Codelist..." oninput="S.variables[${i}].codelist=this.value">`;
+  const linked=v.codelist&&S.codelists[v.codelist];
+  return`<select oninput="S.variables[${i}].codelist=this.value;rMain()">
+    <option value=""${v.codelist?"":" selected"}>None</option>
+    ${clKeys.map(f=>`<option value="${esc(f)}"${v.codelist===f?" selected":""}>${esc(f)} (${S.codelists[f].count} code${S.codelists[f].count!==1?"s":""})</option>`).join("")}
+  </select>`;
+}
 function rVarTable(){
   let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
     <span style="font-size:12px;font-weight:700;color:#003D73">Variable Definitions Table</span>
     <select id="varCatSel" class="fi" style="width:180px;padding:5px 8px;font-size:12px" onchange="S._varCat=this.value"><option value="" disabled ${S._varCat?"":"selected"}>Select category…</option>${VAR_CATS.map(c=>`<option value="${c}"${S._varCat===c?" selected":""}>${c}</option>`).join("")}</select>
     <button class="add-btn" style="margin:0" onclick="addVar()">+ Add Variable</button>
     <button class="add-btn" style="margin:0;border-color:#A5D6A7;color:#2E7D32" onclick="addDefaultVars()">📋 Load Common Variables</button>
+    <button class="add-btn" style="margin:0;border-color:#CE93D8;color:#6A1B9A" onclick="document.getElementById('codelistUpload').click()">📂 Upload Codelists</button>
+    <input type="file" id="codelistUpload" accept=".txt" multiple style="display:none" onchange="handleCodelistUpload(this)">
   </div>
   <table class="vtbl">
     <tr><th style="width:130px">Variable Name</th><th>Definition</th><th style="width:110px">Variable Type</th><th style="width:105px">Plausible Range</th><th>Note</th><th>Codelist</th><th style="width:30px"></th></tr>`;
@@ -283,11 +296,25 @@ function rVarTable(){
       <td><select oninput="S.variables[${i}].type=this.value;rMain()"><option value="" disabled ${v.type?"":"selected"}>Select…</option>${VAR_TYPES.map(t=>`<option value="${t}"${v.type===t?" selected":""}>${t}</option>`).join("")}</select></td>
       <td>${showRange?`<input value="${esc(v.range)}" placeholder="e.g. 9–100" oninput="S.variables[${i}].range=this.value">`:`<span style="color:#bbb;font-size:11px;padding:4px 7px;display:block">—</span>`}</td>
       <td><input value="${esc(v.note)}" placeholder="Note..." oninput="S.variables[${i}].note=this.value"></td>
-      <td><input value="${esc(v.codelist)}" placeholder="Codelist..." oninput="S.variables[${i}].codelist=this.value"></td>
+      <td>${rCodelistCell(v,i)}</td>
       <td><button class="del-var" onclick="delVar(${i})" title="Delete">×</button></td>
     </tr>`;
   });
   h+=`</table>`;
+  const clKeys=Object.keys(S.codelists);
+  if(clKeys.length>0){
+    h+=`<div class="sec-sub" style="margin-top:18px">Uploaded Codelists (${clKeys.length} file${clKeys.length>1?"s":""})</div>`;
+    h+=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">`;
+    clKeys.forEach(fname=>{
+      const cl=S.codelists[fname];
+      h+=`<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #CE93D8;background:#F8F0FF;border-radius:8px;font-size:12px">
+        <span style="color:#6A1B9A;font-weight:700">📄 ${esc(fname)}</span>
+        <span style="color:#888">${cl.count} code${cl.count!==1?"s":""}</span>
+        <button style="background:none;border:none;color:#C62828;font-weight:900;font-size:13px;cursor:pointer;padding:0 2px" onclick="delete S.codelists['${fname.replace(/'/g,"\\'")}'];rMain();rPrev()" title="Remove">×</button>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
   return h;
 }
 function addVar(){
@@ -328,6 +355,26 @@ function addDefaultVars(){
   ];
   S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
   rMain();rPrev();
+}
+function handleCodelistUpload(input){
+  const files=Array.from(input.files||[]);
+  if(!files.length)return;
+  let loaded=0;
+  files.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const text=e.target.result||"";
+      const codes=text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
+        const parts=line.split("\t");
+        return{code:parts[0].trim(),description:(parts[1]||"").trim()};
+      });
+      S.codelists[file.name]={codes,count:codes.length};
+      loaded++;
+      if(loaded===files.length){rMain();rPrev();}
+    };
+    reader.readAsText(file);
+  });
+  input.value="";
 }
 
 // FEASIBILITY CHECKS
@@ -539,6 +586,27 @@ Be specific and precise. Where information is missing, note it as "[TO BE SPECIF
 function toggleOutput(){S.showOut=!S.showOut;const bt=document.getElementById("btnTog");bt.textContent=S.showOut?"Hide Output":"Show Output";rMain();}
 
 // EXPORT
+function buildCodelistAppendix(){
+  const linked=S.variables.filter(v=>v.name.trim()&&v.codelist&&S.codelists[v.codelist]);
+  if(linked.length===0)return"";
+  const done=new Set();
+  const entries=[];
+  linked.forEach(v=>{
+    const key=v.name+"||"+v.codelist;
+    if(done.has(key))return;
+    done.add(key);
+    const cl=S.codelists[v.codelist];
+    entries.push({variable:v.name,codes:cl.codes.map(c=>c.code).join(", ")});
+  });
+  if(entries.length===0)return"";
+  let h=`<h2>Codelist Appendix</h2>`;
+  h+=`<table class="vt"><tr><th style="padding:5pt 8pt">Variable</th><th style="padding:5pt 8pt">ICD/NDC Codes</th></tr>`;
+  entries.forEach((e,i)=>{
+    h+=`<tr style="background:${i%2===0?"#F5F8FC":"#fff"}"><td style="border:1pt solid #D1E3F3;padding:5pt 8pt;font-weight:bold;color:#003D73;vertical-align:top;white-space:nowrap">${e.variable}</td><td style="border:1pt solid #D1E3F3;padding:5pt 8pt;font-family:Consolas,monospace;font-size:9pt;line-height:1.6">${e.codes}</td></tr>`;
+  });
+  h+=`</table>`;
+  return h;
+}
 function exportToWord(){
   const st=STYPES.find(t=>t.id===S.studyType);
   const ds=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
@@ -643,6 +711,8 @@ ${S.considerations.output_format?`<p><strong>Output Format:</strong> ${S.conside
 ${S.considerations.other_notes?`<p><strong>Additional Notes:</strong><br>${S.considerations.other_notes.split("\n").join("<br>")}</p>`:""}
 
 ${S.specOut?`<h2>8. AI-Generated Narrative (Generated Section)</h2><div style="background:#F8F0FF;border:1pt solid #CE93D8;padding:12pt;font-size:10.5pt;line-height:1.7">${hb}</div>`:""}
+
+${buildCodelistAppendix()}
 
 <div class="ft">
 <p>Generated by Data Spec Builder · Eli Lilly SDIA · ${ds}</p>
