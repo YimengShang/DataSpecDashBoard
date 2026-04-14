@@ -138,6 +138,35 @@ select,input,textarea{font-family:inherit;font-size:13px;color:#222;box-sizing:b
   <div id="main"></div>
   <div id="prev"></div>
 </div>
+
+<!-- Codelist modal -->
+<div id="clModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:28px 32px;width:460px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.18)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <span style="font-size:15px;font-weight:800;color:#003D73">Add Codelist</span>
+      <button onclick="document.getElementById('clModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1">×</button>
+    </div>
+    <div style="display:flex;gap:0;border-bottom:2px solid #E8F2FA;margin-bottom:18px">
+      <button id="clTabLink" onclick="clSwitchTab('link')" style="padding:7px 18px;border:none;background:none;font-size:13px;font-weight:700;color:#0060A9;border-bottom:3px solid #0060A9;margin-bottom:-2px;cursor:pointer">🔗 Paste Link <span style="font-size:10px;background:#0060A9;color:#fff;border-radius:8px;padding:1px 7px;margin-left:4px">Preferred</span></button>
+      <button id="clTabFile" onclick="clSwitchTab('file')" style="padding:7px 18px;border:none;background:none;font-size:13px;font-weight:700;color:#888;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer">📂 Upload File</button>
+    </div>
+    <div id="clPanelLink">
+      <label style="font-size:12px;font-weight:700;color:#444;display:block;margin-bottom:4px">Display Name</label>
+      <input id="clLinkLabel" class="fi" placeholder="e.g. Obesity Medication Code List (V6)" style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:700;color:#444;display:block;margin-bottom:4px">Teams / SharePoint Link</label>
+      <input id="clLinkUrl" class="fi" type="url" placeholder="https://collab.lilly.com/...">
+      <p style="font-size:11px;color:#888;margin:8px 0 18px">In Teams → Files → right-click the file → <strong>Copy link</strong></p>
+      <button onclick="addCodelistLink()" class="btn-grn" style="width:100%">Add Codelist</button>
+    </div>
+    <div id="clPanelFile" style="display:none">
+      <p style="font-size:12px;color:#555;margin:0 0 14px">Upload a <strong>.txt</strong> or <strong>.csv</strong> file — codes will be parsed and included in the report appendix if no link is provided.</p>
+      <input type="file" id="clModalFile" accept=".txt,.csv,.tsv,.xlsx" multiple class="fi" style="padding:6px">
+      <p style="font-size:11px;color:#888;margin:8px 0 18px">After uploading you can still paste a Teams link to use instead of the appendix.</p>
+      <button onclick="doFileUpload()" class="btn-grn" style="width:100%">Upload</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const CL={B:"#0060A9",D:"#003D73",L:"#E8F2FA",A:"#00A0DF",G:"#2E7D32",AM:"#F59E0B",R:"#C62828",P:"#6A1B9A",PL:"#F3E5F5",T:"#00695C",TL:"#E0F2F1",O:"#E65100",OL:"#FFF3E0"};
 const STYPES=[
@@ -262,14 +291,40 @@ function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
 
 // VARIABLE TABLE
 const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
+
+// Preload codelists. `url` is a Teams/SharePoint link so the file is accessible
+// from any downloaded copy of this HTML. Falls back to relative folder if blank.
+const PRELOAD_FILES=[
+  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"Obesity Medication Code List (V6)", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=T3xGPa"},
+  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5", label:"Antihypertensive Medication Code List (V5)", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=b0oODF"},
+];
+
 function rCodelistCell(v,i){
   const clKeys=Object.keys(S.codelists);
-  if(clKeys.length===0)return`<input value="${esc(v.codelist)}" placeholder="Codelist..." oninput="S.variables[${i}].codelist=this.value">`;
-  const linked=v.codelist&&S.codelists[v.codelist];
-  return`<select oninput="S.variables[${i}].codelist=this.value;rMain()">
-    <option value=""${v.codelist?"":" selected"}>None</option>
-    ${clKeys.map(f=>`<option value="${esc(f)}"${v.codelist===f?" selected":""}>${esc(f)} (${S.codelists[f].count} code${S.codelists[f].count!==1?"s":""})</option>`).join("")}
-  </select>`;
+  const pf = PRELOAD_FILES.find(f=>f.name===v.codelist);
+
+  const dropdown=`<select onchange="handleCodelistSelect(this,${i})">
+    <option value=""${!v.codelist?" selected":""}>None</option>
+    ${PRELOAD_FILES.length>0?`<optgroup label="📁 Preload Codelist">${PRELOAD_FILES.map(f=>`<option value="${esc(f.name)}"${v.codelist===f.name?" selected":""}>${esc(f.label)}</option>`).join("")}</optgroup>`:""}
+    ${clKeys.length>0?`<optgroup label="📂 Uploaded">${clKeys.map(f=>`<option value="${esc(f)}"${v.codelist===f?" selected":""}>${S.codelists[f].url?"🔗":S.codelists[f].refOnly?"📎":"📄"} ${esc(S.codelists[f].label||f)}${S.codelists[f].refOnly||S.codelists[f].url?"":" ("+S.codelists[f].count+")"}</option>`).join("")}</optgroup>`:""}
+    <option value="__upload__">📂 Upload…</option>
+  </select>
+  <input type="file" id="clUpload_${i}" style="display:none" onchange="handleCodelistUpload(this,${i})">`;
+
+  const link = pf
+    ? `<a href="${pf.url || 'preload codelist/'+esc(pf.name)}" target="_blank" style="font-size:11px;color:#0060A9;display:block;margin-top:3px">📄 ${esc(pf.label)}</a>`
+    : "";
+
+  return dropdown + link;
+}
+function handleCodelistSelect(sel,i){
+  if(sel.value==="__upload__"){
+    sel.value=S.variables[i].codelist||"";
+    document.getElementById("clUpload_"+i).click();
+  } else {
+    S.variables[i].codelist=sel.value;
+    rMain();
+  }
 }
 function rVarTable(){
   let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
@@ -277,8 +332,8 @@ function rVarTable(){
     <select id="varCatSel" class="fi" style="width:180px;padding:5px 8px;font-size:12px" onchange="S._varCat=this.value"><option value="" disabled ${S._varCat?"":"selected"}>Select category…</option>${VAR_CATS.map(c=>`<option value="${c}"${S._varCat===c?" selected":""}>${c}</option>`).join("")}</select>
     <button class="add-btn" style="margin:0" onclick="addVar()">+ Add Variable</button>
     <button class="add-btn" style="margin:0;border-color:#A5D6A7;color:#2E7D32" onclick="addDefaultVars()">📋 Load Common Variables</button>
-    <button class="add-btn" style="margin:0;border-color:#CE93D8;color:#6A1B9A" onclick="document.getElementById('codelistUpload').click()">📂 Upload Codelists</button>
-    <input type="file" id="codelistUpload" accept=".txt" multiple style="display:none" onchange="handleCodelistUpload(this)">
+    <button class="add-btn" style="margin:0;border-color:#CE93D8;color:#6A1B9A" onclick="openCodelistModal()">📂 Add Codelist</button>
+    <input type="file" id="codelistUpload" accept=".txt,.csv,.tsv,.xlsx" multiple style="display:none" onchange="handleCodelistUpload(this)">
   </div>
   <table class="vtbl">
     <tr><th style="width:130px">Variable Name</th><th>Definition</th><th style="width:110px">Variable Type</th><th style="width:105px">Plausible Range</th><th>Note</th><th>Codelist</th><th style="width:30px"></th></tr>`;
@@ -307,10 +362,15 @@ function rVarTable(){
     h+=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">`;
     clKeys.forEach(fname=>{
       const cl=S.codelists[fname];
-      h+=`<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid #CE93D8;background:#F8F0FF;border-radius:8px;font-size:12px">
-        <span style="color:#6A1B9A;font-weight:700">📄 ${esc(fname)}</span>
-        <span style="color:#888">${cl.count} code${cl.count!==1?"s":""}</span>
-        <button style="background:none;border:none;color:#C62828;font-weight:900;font-size:13px;cursor:pointer;padding:0 2px" onclick="delete S.codelists['${fname.replace(/'/g,"\\'")}'];rMain();rPrev()" title="Remove">×</button>
+      const fesc=fname.replace(/'/g,"\\'");
+      const displayName=cl.label||fname;
+      h+=`<div style="display:flex;flex-direction:column;gap:4px;padding:8px 12px;border:1px solid #CE93D8;background:#F8F0FF;border-radius:8px;font-size:12px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="color:#6A1B9A;font-weight:700">📄 ${esc(displayName)}</span>
+          <span style="color:#888">${cl.url?"🔗 linked":cl.refOnly?"reference only":cl.count+" code"+(cl.count!==1?"s":"")}</span>
+          <button style="background:none;border:none;color:#C62828;font-weight:900;font-size:13px;cursor:pointer;padding:0 2px" onclick="delete S.codelists['${fesc}'];rMain();rPrev()" title="Remove">×</button>
+        </div>
+        ${!cl.url?`<input type="url" placeholder="Paste Teams/SharePoint link (optional)" value="${esc(cl.url||"")}" style="font-size:11px;padding:3px 6px;border:1px solid #CE93D8;border-radius:4px;width:320px;color:#444" oninput="S.codelists['${fesc}'].url=this.value">`:""}
       </div>`;
     });
     h+=`</div>`;
@@ -356,23 +416,33 @@ function addDefaultVars(){
   S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
   rMain();rPrev();
 }
-function handleCodelistUpload(input){
+function handleCodelistUpload(input,varIdx){
   const files=Array.from(input.files||[]);
   if(!files.length)return;
   let loaded=0;
   files.forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=function(e){
-      const text=e.target.result||"";
-      const codes=text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
-        const parts=line.split("\t");
-        return{code:parts[0].trim(),description:(parts[1]||"").trim()};
-      });
-      S.codelists[file.name]={codes,count:codes.length};
+    const isTxt=/\.(txt|csv|tsv)$/i.test(file.name);
+    if(isTxt){
+      const reader=new FileReader();
+      reader.onload=function(e){
+        const text=e.target.result||"";
+        const codes=text.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{
+          const parts=line.split(/\t|,/);
+          return{code:parts[0].trim(),description:(parts[1]||"").trim()};
+        });
+        S.codelists[file.name]={codes,count:codes.length};
+        if(varIdx!=null)S.variables[varIdx].codelist=file.name;
+        loaded++;
+        if(loaded===files.length){rMain();rPrev();}
+      };
+      reader.readAsText(file);
+    } else {
+      // Non-parseable file (xlsx, pdf, etc.) — store as reference only
+      S.codelists[file.name]={codes:[],count:0,refOnly:true};
+      if(varIdx!=null)S.variables[varIdx].codelist=file.name;
       loaded++;
       if(loaded===files.length){rMain();rPrev();}
-    };
-    reader.readAsText(file);
+    }
   });
   input.value="";
 }
@@ -586,27 +656,6 @@ Be specific and precise. Where information is missing, note it as "[TO BE SPECIF
 function toggleOutput(){S.showOut=!S.showOut;const bt=document.getElementById("btnTog");bt.textContent=S.showOut?"Hide Output":"Show Output";rMain();}
 
 // EXPORT
-function buildCodelistAppendix(){
-  const linked=S.variables.filter(v=>v.name.trim()&&v.codelist&&S.codelists[v.codelist]);
-  if(linked.length===0)return"";
-  const done=new Set();
-  const entries=[];
-  linked.forEach(v=>{
-    const key=v.name+"||"+v.codelist;
-    if(done.has(key))return;
-    done.add(key);
-    const cl=S.codelists[v.codelist];
-    entries.push({variable:v.name,codes:cl.codes.map(c=>c.code).join(", ")});
-  });
-  if(entries.length===0)return"";
-  let h=`<h2>Codelist Appendix</h2>`;
-  h+=`<table class="vt"><tr><th style="padding:5pt 8pt">Variable</th><th style="padding:5pt 8pt">ICD/NDC Codes</th></tr>`;
-  entries.forEach((e,i)=>{
-    h+=`<tr style="background:${i%2===0?"#F5F8FC":"#fff"}"><td style="border:1pt solid #D1E3F3;padding:5pt 8pt;font-weight:bold;color:#003D73;vertical-align:top;white-space:nowrap">${e.variable}</td><td style="border:1pt solid #D1E3F3;padding:5pt 8pt;font-family:Consolas,monospace;font-size:9pt;line-height:1.6">${e.codes}</td></tr>`;
-  });
-  h+=`</table>`;
-  return h;
-}
 function exportToWord(){
   const st=STYPES.find(t=>t.id===S.studyType);
   const ds=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
@@ -625,7 +674,16 @@ function exportToWord(){
     let row="";
     if(v.cat!==_lastCat){_lastCat=v.cat;row+=`<tr><td colspan="6" style="background:#E8F2FA;color:#003D73;font-weight:bold;padding:4pt 8pt;font-size:9pt;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;_ri=0;}
     const showRange=(v.type||"")==="Continuous" && v.cat!=="Outcomes";
-    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:110pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:80pt">${v.type||""}</td><td style="padding:5pt 8pt;color:#555;width:70pt">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.note||""}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.codelist||""}</td></tr>`;
+    const pf=PRELOAD_FILES.find(f=>f.name===v.codelist);
+    const ucl=!pf&&v.codelist?S.codelists[v.codelist]:null;
+    const codelistCell=pf
+      ?`<a href="${pf.url||'preload codelist/'+pf.name}" style="color:#0060A9">${pf.label}</a>`
+      :ucl&&ucl.url
+        ?`<a href="${ucl.url}" style="color:#0060A9">${v.codelist}</a>`
+        :ucl&&!ucl.refOnly&&ucl.codes.length
+          ?`${v.codelist} <em style="font-size:8pt;color:#888">(see Appendix)</em>`
+          :(v.codelist||"");
+    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:110pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:80pt">${v.type||""}</td><td style="padding:5pt 8pt;color:#555;width:70pt">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.note||""}</td><td style="padding:5pt 8pt;width:90pt">${codelistCell}</td></tr>`;
     _ri++;return row;
   }).join("");
   const feasItems=S.feasibility.map(i=>`<li>${FEAS_OPTS[i]}</li>`).join("");
@@ -712,7 +770,7 @@ ${S.considerations.other_notes?`<p><strong>Additional Notes:</strong><br>${S.con
 
 ${S.specOut?`<h2>8. AI-Generated Narrative (Generated Section)</h2><div style="background:#F8F0FF;border:1pt solid #CE93D8;padding:12pt;font-size:10.5pt;line-height:1.7">${hb}</div>`:""}
 
-${buildCodelistAppendix()}
+${(()=>{const uploaded=Object.entries(S.codelists).filter(([,cl])=>!cl.refOnly&&cl.codes.length&&!cl.url);if(!uploaded.length)return"";const tables=uploaded.map(([fname,cl])=>`<h3 style="color:#003D73;font-size:11pt;margin-top:16pt">${fname}</h3><table class="vt"><tr><th style="width:120pt">Code</th><th>Description</th></tr>${cl.codes.map(c=>`<tr><td style="padding:3pt 8pt;font-family:monospace">${c.code}</td><td style="padding:3pt 8pt">${c.description||""}</td></tr>`).join("")}</table>`).join("");return`<h2>Appendix: Uploaded Codelists</h2>${tables}`;})()}
 
 <div class="ft">
 <p>Generated by Data Spec Builder · Eli Lilly SDIA · ${ds}</p>
@@ -853,7 +911,41 @@ function rPrev(){
   el.innerHTML=h;
 }
 
-// INIT
+// CODELIST MODAL
+function openCodelistModal(){
+  document.getElementById("clLinkLabel").value="";
+  document.getElementById("clLinkUrl").value="";
+  document.getElementById("clModalFile").value="";
+  clSwitchTab("link");
+  const m=document.getElementById("clModal");
+  m.style.display="flex";
+}
+function clSwitchTab(tab){
+  const isLink=tab==="link";
+  document.getElementById("clPanelLink").style.display=isLink?"block":"none";
+  document.getElementById("clPanelFile").style.display=isLink?"none":"block";
+  document.getElementById("clTabLink").style.color=isLink?"#0060A9":"#888";
+  document.getElementById("clTabLink").style.borderBottomColor=isLink?"#0060A9":"transparent";
+  document.getElementById("clTabFile").style.color=isLink?"#888":"#0060A9";
+  document.getElementById("clTabFile").style.borderBottomColor=isLink?"transparent":"#0060A9";
+}
+function addCodelistLink(){
+  const label=document.getElementById("clLinkLabel").value.trim();
+  const url=document.getElementById("clLinkUrl").value.trim();
+  if(!label||!url){alert("Please enter both a display name and a link.");return;}
+  const key=label;
+  S.codelists[key]={codes:[],count:0,refOnly:true,url,label};
+  document.getElementById("clModal").style.display="none";
+  rMain();rPrev();
+}
+function doFileUpload(){
+  const input=document.getElementById("clModalFile");
+  if(!input.files.length){alert("Please select a file.");return;}
+  handleCodelistUpload(input);
+  document.getElementById("clModal").style.display="none";
+}
+// close modal on backdrop click
+document.getElementById("clModal").addEventListener("click",function(e){if(e.target===this)this.style.display="none";});
 document.getElementById("btnGen").disabled=false;
 rStypes();rNav();rMain();rPrev();
 </script>
