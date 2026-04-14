@@ -167,6 +167,18 @@ select,input,textarea{font-family:inherit;font-size:13px;color:#222;box-sizing:b
   </div>
 </div>
 
+<!-- Preload file picker modal -->
+<div id="pfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:28px 32px;width:500px;max-width:95vw;box-shadow:0 8px 32px rgba(0,0,0,0.18);display:flex;flex-direction:column;max-height:80vh">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:15px;font-weight:800;color:#003D73">📁 Preload Files</span>
+      <button onclick="document.getElementById('pfModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1">×</button>
+    </div>
+    <input id="pfSearch" type="text" placeholder="Search files…" oninput="filterPreloadFiles()" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;margin-bottom:12px">
+    <div id="pfList" style="overflow-y:auto;flex:1;border:1px solid #E8F2FA;border-radius:8px"></div>
+  </div>
+</div>
+
 <script>
 const CL={B:"#0060A9",D:"#003D73",L:"#E8F2FA",A:"#00A0DF",G:"#2E7D32",AM:"#F59E0B",R:"#C62828",P:"#6A1B9A",PL:"#F3E5F5",T:"#00695C",TL:"#E0F2F1",O:"#E65100",OL:"#FFF3E0"};
 const STYPES=[
@@ -292,39 +304,82 @@ function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
 // VARIABLE TABLE
 const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
 
-// Preload codelists. `url` is a Teams/SharePoint link so the file is accessible
-// from any downloaded copy of this HTML. Falls back to relative folder if blank.
+// Preload codelists sourced from File_Inventory.csv — name/label = File Name, url = SharePoint link.
 const PRELOAD_FILES=[
-  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"Obesity Medication Code List (V6)", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=T3xGPa"},
-  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5", label:"Antihypertensive Medication Code List (V5)", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=b0oODF"},
+  {name:"A1C loinc.txt", label:"A1C loinc.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCtvMvE7BwCSJHO90rmj6H2Aa6X4T5vn21ikzSY90d7rUA?e=wNAu5m"},
+  {name:"All GLP.txt", label:"All GLP.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQDhT0msDywYSIh41sR0yrURAT33DDInosfEMtfR4LeyYr0?e=pejfVk"},
+  {name:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", label:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
+  {name:"Antihyperglycemic_NDC_Code_List.xlsx", label:"Antihyperglycemic_NDC_Code_List.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDodL9Q9hupSoXwL-loql98ATZyGxTIeR2HnDHhRdZHDs4?e=dy0UU4"},
+  {name:"AOMs_execpt_GLP1.xlsx", label:"AOMs_execpt_GLP1.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDEBA9o9R7pT5hFeSyH7hVLAWTZ22sJ3cv2gt6qRuipYnw?e=Johnsq"},
+  {name:"Biomarkers_Diab_Obes.xlsx", label:"Biomarkers_Diab_Obes.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBiUeLIUj8sQrvDIY6kKtckAYwv2JudkfLNA-GgKn9Ycos?e=Ee9VF1"},
+  {name:"BMI LOINC.txt", label:"BMI LOINC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBL18GgLMZVTZy4fVZF0l3gAapcmXbJCQlV9MepqEF3LFk?e=p1GFtp"},
+  {name:"BMI Z codes FULL RANGE.txt", label:"BMI Z codes FULL RANGE.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCQvfvydb1UQK-pkgCWYIXlAQZ3QS0D50BEMthXBvZZkFM?e=4Y4fce"},
+  {name:"codes_ORC.xlsx", label:"codes_ORC.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQA05K8sA15VRrTvlm5zWXm5AYw5FHo9w9p13alfW17MmT4?e=zw5hiQ"},
+  {name:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", label:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBe6aqBvuqDQpS7IGeihawRAUocg9ShiAjxNmhSlI51FgQ?e=787OhW"},
+  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", label:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=1HyZyU"},
+  {name:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", label:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAcMV7z5zDXQ55isnq1lQ6_AamTjh_iBpgfrELs1VRhF6Y?e=7OPvTX"},
+  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=mrft90"},
+  {name:"Diab_drug_amylin.xlsx", label:"Diab_drug_amylin.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCZ5uxRDn9SQKRdk9NO0YSyAb31h17lRMrpzqpj600k9DE?e=jqdUXi"},
+  {name:"Diab_drug_exl_GLP.xlsx", label:"Diab_drug_exl_GLP.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB_fNW_ulRPTpYHTfwDK875AZX_2unyvWf3LpiF6b_MrCg?e=A5Wqzx"},
+  {name:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", label:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBSsP7NmBfRQYJKB7fFK1xtAaS_WIAO1E62THfDwYNEJ9I?e=O1fdmH"},
+  {name:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", label:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQAP22UYjvhPQLnp8DBOGGKxAXCVpSlEVGpAN9c7Jvy1QPk?e=VgyNS8"},
+  {name:"Gest DM.txt", label:"Gest DM.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBfUHmcfZeKSrEmxPDEC2N0AR1bEnoZ_orXZBegQm0mGY8?e=9dX7Lb"},
+  {name:"Hormonal_Contraception_Claims_Code_List.xlsx", label:"Hormonal_Contraception_Claims_Code_List.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAIzvO7o5NdSohXQxaSB9zVAUazbgkdZ7mxOh23tLe1jPc?e=3UN7VS"},
+  {name:"MOunjaro.txt", label:"MOunjaro.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCRjYnJcQHQR6-WUoTh3diJATGoZoFDVpY72nN8wscQi18?e=UgHvEb"},
+  {name:"non-GLP1_AOM.xlsx", label:"non-GLP1_AOM.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCKVqQN2iKJTLyVq4wFAVdYAenQHjwsxeL6sO-6NofTqlo?e=wr4HDA"},
+  {name:"ORCs.xlsx", label:"ORCs.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDJwXPqOLo1RI6ZWq7--fYBAeb8fAdhSwfP0vXKkqdvnFo?e=j7hqy8"},
+  {name:"Other Diabetes.txt", label:"Other Diabetes.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQARrNuLQKnIToVia8eyveXbAdNic4Pfg1TlPXKAoziEb80?e=N8Jm7l"},
+  {name:"Saxenda NDC.txt", label:"Saxenda NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCnpr77jo07QoiBQDCL9LH2AW6Wq6ly09959FwfLtDO65g?e=ABWv3V"},
+  {name:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", label:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQABeCMpKjrBRJ9DOKgmJ9zCAR_6IvHii7dXMGCxEEx79DA?e=f9msgh"},
+  {name:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", label:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDNEZbyUlYNQbxHp03G4TETAd7Z79puvQ29hTzL2QkKqDo?e=L7nSjX"},
+  {name:"TZD_NDC_Codes_No_Dash.xlsx", label:"TZD_NDC_Codes_No_Dash.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDyCN2URW8sR5718vwS8zroAZ3qQ9g_cNQ-wEewmuaYhUg?e=mkWrYP"},
+  {name:"Wegovy NDC.txt", label:"Wegovy NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBx0g1R_3oTTb4BbMe9biArAZIkK3yhoth7sdAMTYlte90?e=aNVpVq"},
+  {name:"Zepbound NDC.txt", label:"Zepbound NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQALgW2ysPUlRLU9HxR6u4asAaZ_PgkE1MBsaf-1LRQrZEE?e=GR8v51"},
 ];
 
 function rCodelistCell(v,i){
   const clKeys=Object.keys(S.codelists);
-  const pf = PRELOAD_FILES.find(f=>f.name===v.codelist);
+  const cls=Array.isArray(v.codelists)?v.codelists:(v.codelist?[v.codelist]:[]);
 
-  const dropdown=`<select onchange="handleCodelistSelect(this,${i})">
-    <option value=""${!v.codelist?" selected":""}>None</option>
-    ${PRELOAD_FILES.length>0?`<optgroup label="📁 Preload Codelist">${PRELOAD_FILES.map(f=>`<option value="${esc(f.name)}"${v.codelist===f.name?" selected":""}>${esc(f.label)}</option>`).join("")}</optgroup>`:""}
-    ${clKeys.length>0?`<optgroup label="📂 Uploaded">${clKeys.map(f=>`<option value="${esc(f)}"${v.codelist===f?" selected":""}>${S.codelists[f].url?"🔗":S.codelists[f].refOnly?"📎":"📄"} ${esc(S.codelists[f].label||f)}${S.codelists[f].refOnly||S.codelists[f].url?"":" ("+S.codelists[f].count+")"}</option>`).join("")}</optgroup>`:""}
+  const tags=cls.map((name,ti)=>{
+    const pf=PRELOAD_FILES.find(f=>f.name===name);
+    const ucl=S.codelists[name];
+    const href=pf?(pf.url||'preload codelist/'+name):ucl?.url||"";
+    const label=pf?pf.label:ucl?.label||name;
+    return `<div style="display:inline-flex;align-items:center;gap:4px;background:#E8F2FA;border:1px solid #B0CFE8;border-radius:12px;padding:2px 8px 2px 10px;font-size:11px;color:#003D73;margin:2px">
+      ${href?`<a href="${esc(href)}" target="_blank" style="color:#003D73;text-decoration:none">${esc(label)}</a>`:`<span>${esc(label)}</span>`}
+      <button onclick="removeCodelist(${i},${ti})" style="background:none;border:none;cursor:pointer;color:#888;font-size:12px;line-height:1;padding:0 0 0 2px" title="Remove">×</button>
+    </div>`;
+  }).join("");
+
+  const dropdown=`<select onchange="handleCodelistSelect(this,${i})" style="margin-top:${cls.length?'4':'0'}px">
+    <option value="" disabled selected>Add codelist…</option>
+    <option value="__preload__">📁 Preload Files…</option>
+    ${clKeys.length>0?`<optgroup label="📂 Uploaded">${clKeys.map(f=>`<option value="${esc(f)}">${S.codelists[f].url?"🔗":S.codelists[f].refOnly?"📎":"📄"} ${esc(S.codelists[f].label||f)}${S.codelists[f].refOnly||S.codelists[f].url?"":" ("+S.codelists[f].count+")"}</option>`).join("")}</optgroup>`:""}
     <option value="__upload__">📂 Upload…</option>
-  </select>
-  <input type="file" id="clUpload_${i}" style="display:none" onchange="handleCodelistUpload(this,${i})">`;
+  </select>`;
 
-  const link = pf
-    ? `<a href="${pf.url || 'preload codelist/'+esc(pf.name)}" target="_blank" style="font-size:11px;color:#0060A9;display:block;margin-top:3px">📄 ${esc(pf.label)}</a>`
-    : "";
-
-  return dropdown + link;
+  return `<div>${tags}</div>${dropdown}`;
 }
 function handleCodelistSelect(sel,i){
-  if(sel.value==="__upload__"){
-    sel.value=S.variables[i].codelist||"";
-    document.getElementById("clUpload_"+i).click();
-  } else {
-    S.variables[i].codelist=sel.value;
+  const val=sel.value;
+  const v=S.variables[i];
+  if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];
+  sel.selectedIndex=0;
+  if(val==="__upload__"){
+    openCodelistModal(i);
+  } else if(val==="__preload__"){
+    openPreloadModal(i);
+  } else if(val&&!v.codelists.includes(val)){
+    v.codelists.push(val);
     rMain();
   }
+}
+function removeCodelist(i,ti){
+  const v=S.variables[i];
+  if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];
+  v.codelists.splice(ti,1);
+  rMain();
 }
 function rVarTable(){
   let h=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
@@ -379,7 +434,7 @@ function rVarTable(){
 }
 function addVar(){
   const cat=S._varCat||VAR_CATS[0];
-  const newVar={name:"",definition:"",type:"",note:"",codelist:"",range:"",cat:cat};
+  const newVar={name:"",definition:"",type:"",note:"",codelists:[],range:"",cat:cat};
   const lastIdx=S.variables.map((v,i)=>v.cat===cat?i:-1).filter(i=>i>=0);
   if(lastIdx.length>0)S.variables.splice(lastIdx[lastIdx.length-1]+1,0,newVar);
   else S.variables.push(newVar);
@@ -388,30 +443,30 @@ function addVar(){
 function delVar(i){S.variables.splice(i,1);rMain();}
 function addDefaultVars(){
   const defaults=[
-    {name:"PATID",definition:"Patient ID",type:"ID",note:"",codelist:"",range:"",cat:"ID"},
-    {name:"Intervention",definition:"",type:"Categorical",note:"",codelist:"",range:"",cat:"Treatment"},
-    {name:"Comparator",definition:"",type:"Categorical",note:"",codelist:"",range:"",cat:"Treatment"},
-    {name:"IndexDate",definition:"First qualifying treatment/event date during index period",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
-    {name:"LastDrugDate",definition:"Date of last day on index drug",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
-    {name:"LastFollowupDate",definition:"Min of: discontinuation, death, end of data, end of max follow-up",type:"Date",note:"",codelist:"",range:"",cat:"Dates"},
-    {name:"Time_outcome1",definition:"Time from index to first outcome event",type:"Continuous",note:"",codelist:"",range:"",cat:"Outcomes"},
-    {name:"Event_outcome1",definition:"1 = event occurred, 0 = censored",type:"Binary",note:"",codelist:"",range:"",cat:"Outcomes"},
-    {name:"Age",definition:"Age at index date",type:"Continuous",note:"",codelist:"",range:"18–120",cat:"Demographics"},
-    {name:"Sex",definition:"Sex at index date",type:"Binary",note:"",codelist:"",range:"",cat:"Demographics"},
-    {name:"Race",definition:"Race",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
-    {name:"Ethnicity",definition:"Hispanic or non-Hispanic",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
-    {name:"Region",definition:"US region",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
-    {name:"Payor",definition:"Commercial or Medicare or missing",type:"Categorical",note:"",codelist:"",range:"",cat:"Demographics"},
-    {name:"BMI",definition:"Value of BMI record in baseline BMI period, or missing",type:"Continuous",note:"",codelist:"",range:"9–100",cat:"Lab Values"},
-    {name:"HBA1C",definition:"Value of HbA1c lab record in baseline period, or missing",type:"Continuous",note:"",codelist:"",range:"3.5–20",cat:"Lab Values"},
-    {name:"CCI",definition:"Baseline Charlson Comorbidity Index score",type:"Continuous",note:"",codelist:"",range:"0–37",cat:"Clinical / Comorbidities"},
-    {name:"T2D",definition:"Yes/No in baseline T2D period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"Hypertension",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"Hyperlipidemia",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Clinical / Comorbidities"},
-    {name:"Obesity_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
-    {name:"Diabetic_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
-    {name:"Statin",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
-    {name:"Anticoagulants",definition:"Yes/No in baseline period",type:"Binary",note:"",codelist:"",range:"",cat:"Medication"},
+    {name:"PATID",definition:"Patient ID",type:"ID",note:"",codelists:[],range:"",cat:"ID"},
+    {name:"Intervention",definition:"",type:"Categorical",note:"",codelists:[],range:"",cat:"Treatment"},
+    {name:"Comparator",definition:"",type:"Categorical",note:"",codelists:[],range:"",cat:"Treatment"},
+    {name:"IndexDate",definition:"First qualifying treatment/event date during index period",type:"Date",note:"",codelists:[],range:"",cat:"Dates"},
+    {name:"LastDrugDate",definition:"Date of last day on index drug",type:"Date",note:"",codelists:[],range:"",cat:"Dates"},
+    {name:"LastFollowupDate",definition:"Min of: discontinuation, death, end of data, end of max follow-up",type:"Date",note:"",codelists:[],range:"",cat:"Dates"},
+    {name:"Time_outcome1",definition:"Time from index to first outcome event",type:"Continuous",note:"",codelists:[],range:"",cat:"Outcomes"},
+    {name:"Event_outcome1",definition:"1 = event occurred, 0 = censored",type:"Binary",note:"",codelists:[],range:"",cat:"Outcomes"},
+    {name:"Age",definition:"Age at index date",type:"Continuous",note:"",codelists:[],range:"18–120",cat:"Demographics"},
+    {name:"Sex",definition:"Sex at index date",type:"Binary",note:"",codelists:[],range:"",cat:"Demographics"},
+    {name:"Race",definition:"Race",type:"Categorical",note:"",codelists:[],range:"",cat:"Demographics"},
+    {name:"Ethnicity",definition:"Hispanic or non-Hispanic",type:"Categorical",note:"",codelists:[],range:"",cat:"Demographics"},
+    {name:"Region",definition:"US region",type:"Categorical",note:"",codelists:[],range:"",cat:"Demographics"},
+    {name:"Payor",definition:"Commercial or Medicare or missing",type:"Categorical",note:"",codelists:[],range:"",cat:"Demographics"},
+    {name:"BMI",definition:"Value of BMI record in baseline BMI period, or missing",type:"Continuous",note:"",codelists:[],range:"9–100",cat:"Lab Values"},
+    {name:"HBA1C",definition:"Value of HbA1c lab record in baseline period, or missing",type:"Continuous",note:"",codelists:[],range:"3.5–20",cat:"Lab Values"},
+    {name:"CCI",definition:"Baseline Charlson Comorbidity Index score",type:"Continuous",note:"",codelists:[],range:"0–37",cat:"Clinical / Comorbidities"},
+    {name:"T2D",definition:"Yes/No in baseline T2D period",type:"Binary",note:"",codelists:[],range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hypertension",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Clinical / Comorbidities"},
+    {name:"Hyperlipidemia",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Clinical / Comorbidities"},
+    {name:"Obesity_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
+    {name:"Diabetic_drug",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
+    {name:"Statin",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
+    {name:"Anticoagulants",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
   ];
   S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
   rMain();rPrev();
@@ -431,7 +486,7 @@ function handleCodelistUpload(input,varIdx){
           return{code:parts[0].trim(),description:(parts[1]||"").trim()};
         });
         S.codelists[file.name]={codes,count:codes.length};
-        if(varIdx!=null)S.variables[varIdx].codelist=file.name;
+        if(varIdx!=null){const v=S.variables[varIdx];if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];if(!v.codelists.includes(file.name))v.codelists.push(file.name);}
         loaded++;
         if(loaded===files.length){rMain();rPrev();}
       };
@@ -439,7 +494,7 @@ function handleCodelistUpload(input,varIdx){
     } else {
       // Non-parseable file (xlsx, pdf, etc.) — store as reference only
       S.codelists[file.name]={codes:[],count:0,refOnly:true};
-      if(varIdx!=null)S.variables[varIdx].codelist=file.name;
+      if(varIdx!=null){const v=S.variables[varIdx];if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];if(!v.codelists.includes(file.name))v.codelists.push(file.name);}
       loaded++;
       if(loaded===files.length){rMain();rPrev();}
     }
@@ -570,7 +625,7 @@ async function generateSpec(){
   const inclText=S.inclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
   const exclText=S.exclusion.filter(v=>v.trim()).map((v,i)=>`${i+1}) ${v}`).join("\n")||"Not specified";
   const feasText=S.feasibility.map(i=>FEAS_OPTS[i]).join("; ")||"Not specified";
-  const varText=S.variables.filter(v=>v.name.trim()).map(v=>`- ${v.name} [${v.type||"Unknown type"}]: ${v.definition}${v.type==="Continuous"&&v.cat!=="Outcomes"&&v.range?" Range: "+v.range:""}${v.note?" Note: "+v.note:""}${v.codelist?" Codelist: "+v.codelist:""}`).join("\n")||"Not specified";
+  const varText=S.variables.filter(v=>v.name.trim()).map(v=>{const cls=Array.isArray(v.codelists)?v.codelists:(v.codelist?[v.codelist]:[]);return`- ${v.name} [${v.type||"Unknown type"}]: ${v.definition}${v.type==="Continuous"&&v.cat!=="Outcomes"&&v.range?" Range: "+v.range:""}${v.note?" Note: "+v.note:""}${cls.length?" Codelist: "+cls.join(", "):""}`}).join("\n")||"Not specified";
   const prompt=`You are a senior pharmacoepidemiologist at Eli Lilly working on a Real-World Evidence study data specification for the Strada data platform. Generate a complete, professional Strada Data Specification document based on the following inputs. Use formal, precise language appropriate for a data specification submitted to a data programmer.
 
 STRADA PROJECT REQUEST ID: ${S.meta.reqId||"Not specified"}
@@ -674,15 +729,15 @@ function exportToWord(){
     let row="";
     if(v.cat!==_lastCat){_lastCat=v.cat;row+=`<tr><td colspan="6" style="background:#E8F2FA;color:#003D73;font-weight:bold;padding:4pt 8pt;font-size:9pt;letter-spacing:0.04em">${v.cat||"Other"}</td></tr>`;_ri=0;}
     const showRange=(v.type||"")==="Continuous" && v.cat!=="Outcomes";
-    const pf=PRELOAD_FILES.find(f=>f.name===v.codelist);
-    const ucl=!pf&&v.codelist?S.codelists[v.codelist]:null;
-    const codelistCell=pf
-      ?`<a href="${pf.url||'preload codelist/'+pf.name}" style="color:#0060A9">${pf.label}</a>`
-      :ucl&&ucl.url
-        ?`<a href="${ucl.url}" style="color:#0060A9">${v.codelist}</a>`
-        :ucl&&!ucl.refOnly&&ucl.codes.length
-          ?`${v.codelist} <em style="font-size:8pt;color:#888">(see Appendix)</em>`
-          :(v.codelist||"");
+    const cls=Array.isArray(v.codelists)?v.codelists:(v.codelist?[v.codelist]:[]);
+    const codelistCell=cls.map(name=>{
+      const pf=PRELOAD_FILES.find(f=>f.name===name);
+      const ucl=!pf?S.codelists[name]:null;
+      if(pf)return`<a href="${pf.url||'preload codelist/'+pf.name}" style="color:#0060A9">${pf.label}</a>`;
+      if(ucl&&ucl.url)return`<a href="${ucl.url}" style="color:#0060A9">${name}</a>`;
+      if(ucl&&!ucl.refOnly&&ucl.codes.length)return`${name} <em style="font-size:8pt;color:#888">(see Appendix)</em>`;
+      return name;
+    }).join("<br>");
     row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:110pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:80pt">${v.type||""}</td><td style="padding:5pt 8pt;color:#555;width:70pt">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.note||""}</td><td style="padding:5pt 8pt;width:90pt">${codelistCell}</td></tr>`;
     _ri++;return row;
   }).join("");
@@ -911,14 +966,50 @@ function rPrev(){
   el.innerHTML=h;
 }
 
+// PRELOAD FILE PICKER MODAL
+let _pfVarIdx=null;
+function openPreloadModal(i){
+  _pfVarIdx=i;
+  document.getElementById("pfSearch").value="";
+  filterPreloadFiles();
+  document.getElementById("pfModal").style.display="flex";
+  setTimeout(()=>document.getElementById("pfSearch").focus(),50);
+}
+function filterPreloadFiles(){
+  const q=document.getElementById("pfSearch").value.trim().toLowerCase();
+  const filtered=q?PRELOAD_FILES.filter(f=>f.name.toLowerCase().includes(q)):PRELOAD_FILES;
+  const list=document.getElementById("pfList");
+  if(filtered.length===0){
+    list.innerHTML=`<p style="text-align:center;color:#888;padding:24px;font-size:13px">No files match "${esc(q)}"</p>`;
+    return;
+  }
+  list.innerHTML=filtered.map(f=>`
+    <div onclick="selectPreloadFile('${esc(f.name).replace(/'/g,"\\'")}',this)"
+         style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #E8F2FA;font-size:13px;color:#222;display:flex;align-items:center;gap:8px;transition:background 0.1s"
+         onmouseover="this.style.background='#E8F2FA'" onmouseout="this.style.background=''">
+      <span style="flex:1">${esc(f.name)}</span>
+      <a href="${esc(f.url)}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:#0060A9;white-space:nowrap">🔗 Open</a>
+    </div>`).join("");
+}
+function selectPreloadFile(name){
+  if(_pfVarIdx===null)return;
+  const v=S.variables[_pfVarIdx];
+  if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];
+  if(!v.codelists.includes(name))v.codelists.push(name);
+  document.getElementById("pfModal").style.display="none";
+  rMain();
+}
+document.getElementById("pfModal").addEventListener("click",function(e){if(e.target===this)this.style.display="none";});
+
 // CODELIST MODAL
-function openCodelistModal(){
+let _clVarIdx=null;
+function openCodelistModal(varIdx){
+  _clVarIdx=(varIdx!=null)?varIdx:null;
   document.getElementById("clLinkLabel").value="";
   document.getElementById("clLinkUrl").value="";
   document.getElementById("clModalFile").value="";
   clSwitchTab("link");
-  const m=document.getElementById("clModal");
-  m.style.display="flex";
+  document.getElementById("clModal").style.display="flex";
 }
 function clSwitchTab(tab){
   const isLink=tab==="link";
@@ -933,15 +1024,19 @@ function addCodelistLink(){
   const label=document.getElementById("clLinkLabel").value.trim();
   const url=document.getElementById("clLinkUrl").value.trim();
   if(!label||!url){alert("Please enter both a display name and a link.");return;}
-  const key=label;
-  S.codelists[key]={codes:[],count:0,refOnly:true,url,label};
+  S.codelists[label]={codes:[],count:0,refOnly:true,url,label};
+  if(_clVarIdx!=null){
+    const v=S.variables[_clVarIdx];
+    if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];
+    if(!v.codelists.includes(label))v.codelists.push(label);
+  }
   document.getElementById("clModal").style.display="none";
   rMain();rPrev();
 }
 function doFileUpload(){
   const input=document.getElementById("clModalFile");
   if(!input.files.length){alert("Please select a file.");return;}
-  handleCodelistUpload(input);
+  handleCodelistUpload(input,_clVarIdx);
   document.getElementById("clModal").style.display="none";
 }
 // close modal on backdrop click
