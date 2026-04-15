@@ -174,6 +174,10 @@ select,input,textarea{font-family:inherit;font-size:13px;color:#222;box-sizing:b
       <span style="font-size:15px;font-weight:800;color:#003D73">📁 Preload Files</span>
       <button onclick="document.getElementById('pfModal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1">×</button>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+      <label style="font-size:12px;font-weight:700;color:#003D73;white-space:nowrap">TA:</label>
+      <div id="pfTaFilters" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+    </div>
     <input id="pfSearch" type="text" placeholder="Search files…" oninput="filterPreloadFiles()" style="width:100%;box-sizing:border-box;padding:8px 12px;border:1px solid #ccc;border-radius:6px;font-size:13px;margin-bottom:12px">
     <div id="pfList" style="overflow-y:auto;flex:1;border:1px solid #E8F2FA;border-radius:8px"></div>
   </div>
@@ -304,37 +308,37 @@ function delCrit(k,i){S[k].splice(i,1);rMain();rPrev();}
 // VARIABLE TABLE
 const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values","Clinical / Comorbidities","Medication","NCO","Other"];
 
-// Preload codelists sourced from File_Inventory.csv — name/label = File Name, url = SharePoint link.
+// Preload codelists sourced from File_Inventory.csv — name/label = File Name, url = SharePoint link, ta = Therapeutic Area.
 const PRELOAD_FILES=[
-  {name:"A1C loinc.txt", label:"A1C loinc.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCtvMvE7BwCSJHO90rmj6H2Aa6X4T5vn21ikzSY90d7rUA?e=wNAu5m"},
-  {name:"All GLP.txt", label:"All GLP.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQDhT0msDywYSIh41sR0yrURAT33DDInosfEMtfR4LeyYr0?e=pejfVk"},
-  {name:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", label:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
-  {name:"Antihyperglycemic_NDC_Code_List.xlsx", label:"Antihyperglycemic_NDC_Code_List.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDodL9Q9hupSoXwL-loql98ATZyGxTIeR2HnDHhRdZHDs4?e=dy0UU4"},
-  {name:"AOMs_execpt_GLP1.xlsx", label:"AOMs_execpt_GLP1.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDEBA9o9R7pT5hFeSyH7hVLAWTZ22sJ3cv2gt6qRuipYnw?e=Johnsq"},
-  {name:"Biomarkers_Diab_Obes.xlsx", label:"Biomarkers_Diab_Obes.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBiUeLIUj8sQrvDIY6kKtckAYwv2JudkfLNA-GgKn9Ycos?e=Ee9VF1"},
-  {name:"BMI LOINC.txt", label:"BMI LOINC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBL18GgLMZVTZy4fVZF0l3gAapcmXbJCQlV9MepqEF3LFk?e=p1GFtp"},
-  {name:"BMI Z codes FULL RANGE.txt", label:"BMI Z codes FULL RANGE.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCQvfvydb1UQK-pkgCWYIXlAQZ3QS0D50BEMthXBvZZkFM?e=4Y4fce"},
-  {name:"codes_ORC.xlsx", label:"codes_ORC.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQA05K8sA15VRrTvlm5zWXm5AYw5FHo9w9p13alfW17MmT4?e=zw5hiQ"},
-  {name:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", label:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBe6aqBvuqDQpS7IGeihawRAUocg9ShiAjxNmhSlI51FgQ?e=787OhW"},
-  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", label:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=1HyZyU"},
-  {name:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", label:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAcMV7z5zDXQ55isnq1lQ6_AamTjh_iBpgfrELs1VRhF6Y?e=7OPvTX"},
-  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=mrft90"},
-  {name:"Diab_drug_amylin.xlsx", label:"Diab_drug_amylin.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCZ5uxRDn9SQKRdk9NO0YSyAb31h17lRMrpzqpj600k9DE?e=jqdUXi"},
-  {name:"Diab_drug_exl_GLP.xlsx", label:"Diab_drug_exl_GLP.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB_fNW_ulRPTpYHTfwDK875AZX_2unyvWf3LpiF6b_MrCg?e=A5Wqzx"},
-  {name:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", label:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBSsP7NmBfRQYJKB7fFK1xtAaS_WIAO1E62THfDwYNEJ9I?e=O1fdmH"},
-  {name:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", label:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQAP22UYjvhPQLnp8DBOGGKxAXCVpSlEVGpAN9c7Jvy1QPk?e=VgyNS8"},
-  {name:"Gest DM.txt", label:"Gest DM.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBfUHmcfZeKSrEmxPDEC2N0AR1bEnoZ_orXZBegQm0mGY8?e=9dX7Lb"},
-  {name:"Hormonal_Contraception_Claims_Code_List.xlsx", label:"Hormonal_Contraception_Claims_Code_List.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAIzvO7o5NdSohXQxaSB9zVAUazbgkdZ7mxOh23tLe1jPc?e=3UN7VS"},
-  {name:"MOunjaro.txt", label:"MOunjaro.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCRjYnJcQHQR6-WUoTh3diJATGoZoFDVpY72nN8wscQi18?e=UgHvEb"},
-  {name:"non-GLP1_AOM.xlsx", label:"non-GLP1_AOM.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCKVqQN2iKJTLyVq4wFAVdYAenQHjwsxeL6sO-6NofTqlo?e=wr4HDA"},
-  {name:"ORCs.xlsx", label:"ORCs.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDJwXPqOLo1RI6ZWq7--fYBAeb8fAdhSwfP0vXKkqdvnFo?e=j7hqy8"},
-  {name:"Other Diabetes.txt", label:"Other Diabetes.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQARrNuLQKnIToVia8eyveXbAdNic4Pfg1TlPXKAoziEb80?e=N8Jm7l"},
-  {name:"Saxenda NDC.txt", label:"Saxenda NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCnpr77jo07QoiBQDCL9LH2AW6Wq6ly09959FwfLtDO65g?e=ABWv3V"},
-  {name:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", label:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQABeCMpKjrBRJ9DOKgmJ9zCAR_6IvHii7dXMGCxEEx79DA?e=f9msgh"},
-  {name:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", label:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDNEZbyUlYNQbxHp03G4TETAd7Z79puvQ29hTzL2QkKqDo?e=L7nSjX"},
-  {name:"TZD_NDC_Codes_No_Dash.xlsx", label:"TZD_NDC_Codes_No_Dash.xlsx", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDyCN2URW8sR5718vwS8zroAZ3qQ9g_cNQ-wEewmuaYhUg?e=mkWrYP"},
-  {name:"Wegovy NDC.txt", label:"Wegovy NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBx0g1R_3oTTb4BbMe9biArAZIkK3yhoth7sdAMTYlte90?e=aNVpVq"},
-  {name:"Zepbound NDC.txt", label:"Zepbound NDC.txt", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQALgW2ysPUlRLU9HxR6u4asAaZ_PgkE1MBsaf-1LRQrZEE?e=GR8v51"},
+  {name:"A1C loinc.txt", label:"A1C loinc.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCtvMvE7BwCSJHO90rmj6H2Aa6X4T5vn21ikzSY90d7rUA?e=wNAu5m"},
+  {name:"All GLP.txt", label:"All GLP.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQDhT0msDywYSIh41sR0yrURAT33DDInosfEMtfR4LeyYr0?e=pejfVk"},
+  {name:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", label:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
+  {name:"Antihyperglycemic_NDC_Code_List.xlsx", label:"Antihyperglycemic_NDC_Code_List.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDodL9Q9hupSoXwL-loql98ATZyGxTIeR2HnDHhRdZHDs4?e=dy0UU4"},
+  {name:"AOMs_execpt_GLP1.xlsx", label:"AOMs_execpt_GLP1.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDEBA9o9R7pT5hFeSyH7hVLAWTZ22sJ3cv2qt6qRuipYnw?e=Johnsq"},
+  {name:"Biomarkers_Diab_Obes.xlsx", label:"Biomarkers_Diab_Obes.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBiUeLIUj8sQrvDIY6kKtckAYwv2JudkfLNA-GgKn9Ycos?e=Ee9VF1"},
+  {name:"BMI LOINC.txt", label:"BMI LOINC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBL18GgLMZVTZy4fVZF0l3gAapcmXbJCQlV9MepqEF3LFk?e=p1GFtp"},
+  {name:"BMI Z codes FULL RANGE.txt", label:"BMI Z codes FULL RANGE.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCQvfvydb1UQK-pkgCWYIXlAQZ3QS0D50BEMthXBvZZkFM?e=4Y4fce"},
+  {name:"codes_ORC.xlsx", label:"codes_ORC.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQA05K8sA15VRrTvlm5zWXm5AYw5FHo9w9p13alfW17MmT4?e=zw5hiQ"},
+  {name:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", label:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBe6aqBvuqDQpS7IGeihawRAUocg9ShiAjxNmhSlI51FgQ?e=787OhW"},
+  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", label:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=1HyZyU"},
+  {name:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", label:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAcMV7z5zDXQ55isnq1lQ6_AamTjh_iBpgfrELs1VRhF6Y?e=7OPvTX"},
+  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=mrft90"},
+  {name:"Diab_drug_amylin.xlsx", label:"Diab_drug_amylin.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCZ5uxRDn9SQKRdk9NO0YSyAb31h17lRMrpzqpj600k9DE?e=jqdUXi"},
+  {name:"Diab_drug_exl_GLP.xlsx", label:"Diab_drug_exl_GLP.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB_fNW_ulRPTpYHTfwDK875AZX_2unyvWf3LpiF6b_MrCg?e=A5Wqzx"},
+  {name:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", label:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBSsP7NmBfRQYJKB7fFK1xtAaS_WIAO1E62THfDwYNEJ9I?e=O1fdmH"},
+  {name:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", label:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQAP22UYjvhPQLnp8DBOGGKxAXCVpSlEVGpAN9c7Jvy1QPk?e=VgyNS8"},
+  {name:"Gest DM.txt", label:"Gest DM.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBfUHmcfZeKSrEmxPDEC2N0AR1bEnoZ_orXZBegQm0mGY8?e=9dX7Lb"},
+  {name:"Hormonal_Contraception_Claims_Code_List.xlsx", label:"Hormonal_Contraception_Claims_Code_List.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAIzvO7o5NdSohXQxaSB9zVAUazbgkdZ7mxOh23tLe1jPc?e=3UN7VS"},
+  {name:"MOunjaro.txt", label:"MOunjaro.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCRjYnJcQHQR6-WUoTh3diJATGoZoFDVpY72nN8wscQi18?e=UgHvEb"},
+  {name:"non-GLP1_AOM.xlsx", label:"non-GLP1_AOM.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCKVqQN2iKJTLyVq4wFAVdYAenQHjwsxeL6sO-6NofTqlo?e=wr4HDA"},
+  {name:"ORCs.xlsx", label:"ORCs.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDJwXPqOLo1RI6ZWq7--fYBAeb8fAdhSwfP0vXKkqdvnFo?e=j7hqy8"},
+  {name:"Other Diabetes.txt", label:"Other Diabetes.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQARrNuLQKnIToVia8eyveXbAdNic4Pfg1TlPXKAoziEb80?e=N8Jm7l"},
+  {name:"Saxenda NDC.txt", label:"Saxenda NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCnpr77jo07QoiBQDCL9LH2AW6Wq6ly09959FwfLtDO65g?e=ABWv3V"},
+  {name:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", label:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQABeCMpKjrBRJ9DOKgmJ9zCAR_6IvHii7dXMGCxEEx79DA?e=f9msgh"},
+  {name:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", label:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDNEZbyUlYNQbxHp03G4TETAd7Z79puvQ29hTzL2QkKqDo?e=L7nSjX"},
+  {name:"TZD_NDC_Codes_No_Dash.xlsx", label:"TZD_NDC_Codes_No_Dash.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDyCN2URW8sR5718vwS8zroAZ3qQ9g_cNQ-wEewmuaYhUg?e=mkWrYP"},
+  {name:"Wegovy NDC.txt", label:"Wegovy NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBx0g1R_3oTTb4BbMe9biArAZIkK3yhoth7sdAMTYlte90?e=aNVpVq"},
+  {name:"Zepbound NDC.txt", label:"Zepbound NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQALgW2ysPUlRLU9HxR6u4asAaZ_PgkE1MBsaf-1LRQrZEE?e=GR8v51"},
 ];
 
 function rCodelistCell(v,i){
@@ -967,20 +971,38 @@ function rPrev(){
 }
 
 // PRELOAD FILE PICKER MODAL
+const PRELOAD_TAS=["CMH","Neuroscience","Immunology","Oncology"];
 let _pfVarIdx=null;
+let _pfTA="";
 function openPreloadModal(i){
   _pfVarIdx=i;
+  _pfTA="";
   document.getElementById("pfSearch").value="";
+  renderPfTaFilters();
   filterPreloadFiles();
   document.getElementById("pfModal").style.display="flex";
   setTimeout(()=>document.getElementById("pfSearch").focus(),50);
 }
+function renderPfTaFilters(){
+  const el=document.getElementById("pfTaFilters");
+  el.innerHTML=PRELOAD_TAS.map(ta=>{
+    const active=_pfTA===ta;
+    return `<button onclick="setPfTA('${ta}')" style="padding:3px 11px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid ${active?"#0060A9":"#C8DDF0"};background:${active?"#E8F2FA":"#fff"};color:${active?"#0060A9":"#666"}">${ta}</button>`;
+  }).join("");
+}
+function setPfTA(ta){
+  _pfTA=(_pfTA===ta)?"":ta;
+  renderPfTaFilters();
+  filterPreloadFiles();
+}
 function filterPreloadFiles(){
   const q=document.getElementById("pfSearch").value.trim().toLowerCase();
-  const filtered=q?PRELOAD_FILES.filter(f=>f.name.toLowerCase().includes(q)):PRELOAD_FILES;
+  let filtered=PRELOAD_FILES;
+  if(_pfTA)filtered=filtered.filter(f=>f.ta===_pfTA);
+  if(q)filtered=filtered.filter(f=>f.name.toLowerCase().includes(q));
   const list=document.getElementById("pfList");
   if(filtered.length===0){
-    list.innerHTML=`<p style="text-align:center;color:#888;padding:24px;font-size:13px">No files match "${esc(q)}"</p>`;
+    list.innerHTML=`<p style="text-align:center;color:#888;padding:24px;font-size:13px">No files match${_pfTA?" ["+_pfTA+"]":""}${q?' "'+esc(q)+'"':""}</p>`;
     return;
   }
   list.innerHTML=filtered.map(f=>`
@@ -988,6 +1010,7 @@ function filterPreloadFiles(){
          style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #E8F2FA;font-size:13px;color:#222;display:flex;align-items:center;gap:8px;transition:background 0.1s"
          onmouseover="this.style.background='#E8F2FA'" onmouseout="this.style.background=''">
       <span style="flex:1">${esc(f.name)}</span>
+      ${f.ta?`<span style="font-size:10px;font-weight:700;background:#E8F2FA;color:#0060A9;border-radius:8px;padding:1px 7px">${esc(f.ta)}</span>`:""}
       <a href="${esc(f.url)}" target="_blank" onclick="event.stopPropagation()" style="font-size:11px;color:#0060A9;white-space:nowrap">🔗 Open</a>
     </div>`).join("");
 }
