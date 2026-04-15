@@ -738,7 +738,7 @@ function exportToWord(){
       if(ucl&&!ucl.refOnly&&ucl.codes.length)return`${name} <em style="font-size:8pt;color:#888">(see Appendix)</em>`;
       return name;
     }).join("<br>");
-    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt;width:110pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555;width:80pt">${v.type||""}</td><td style="padding:5pt 8pt;color:#555;width:70pt">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666;width:90pt">${v.note||""}</td><td style="padding:5pt 8pt;width:90pt">${codelistCell}</td></tr>`;
+    row+=`<tr style="background:${_ri%2===0?"#F5F8FC":"#fff"}"><td style="font-weight:bold;color:#003D73;padding:5pt 8pt">${v.name}</td><td style="padding:5pt 8pt">${v.definition}</td><td style="padding:5pt 8pt;color:#555">${v.type||""}</td><td style="padding:5pt 8pt;color:#555">${showRange?(v.range||""):"—"}</td><td style="padding:5pt 8pt;color:#666">${v.note||""}</td><td style="padding:5pt 8pt">${codelistCell}</td></tr>`;
     _ri++;return row;
   }).join("");
   const feasItems=S.feasibility.map(i=>`<li>${FEAS_OPTS[i]}</li>`).join("");
@@ -752,10 +752,10 @@ h1{font-size:16pt;color:#003D73;border-bottom:2pt solid #003D73;padding-bottom:6
 h2{font-size:12pt;color:#003D73;margin-top:18pt;margin-bottom:6pt;border-left:4pt solid #0060A9;padding-left:8pt}
 h3{font-size:11pt;color:#0060A9;margin-top:12pt;font-weight:bold}
 p,li{margin:3pt 0 7pt 0}
-table{border-collapse:collapse;width:100%}
-.ct td{padding:5pt 10pt;vertical-align:top}
-.vt th{background:#003D73;color:#fff;padding:5pt 8pt;text-align:left}
-.vt td{border:1pt solid #D1E3F3;padding:5pt 8pt;vertical-align:top}
+table{border-collapse:collapse;width:100%;table-layout:fixed}
+.ct td{padding:5pt 10pt;vertical-align:top;word-wrap:break-word}
+.vt th{background:#003D73;color:#fff;padding:5pt 8pt;text-align:left;word-wrap:break-word}
+.vt td{border:1pt solid #D1E3F3;padding:5pt 8pt;vertical-align:top;word-wrap:break-word}
 .ft{font-size:9pt;color:#999;border-top:1pt solid #ddd;padding-top:6pt;margin-top:24pt}
 .note-box{background:#EBF4FB;border:1pt solid #C8DDF0;padding:8pt;margin:10pt 0;font-size:10pt}
 </style></head><body>
@@ -815,7 +815,7 @@ ${S.nco.nco_datasets?`<p><strong>Datasets Required:</strong> ${S.nco.nco_dataset
 ${S.nco.nco_note?`<p>${S.nco.nco_note}</p>`:""}
 
 <h2>6. Variable Definitions</h2>
-${varRows?`<table class="vt"><tr><th style="width:110pt">Variable Name</th><th>Definition</th><th style="width:80pt">Variable Type</th><th style="width:70pt">Plausible Range</th><th style="width:90pt">Note</th><th style="width:90pt">Codelist</th></tr>${varRows}</table>`:"<p>[TO BE SPECIFIED — use 'Load Common Variables' in builder]</p>"}
+${varRows?`<table class="vt"><tr><th style="width:15%">Variable Name</th><th style="width:25%">Definition</th><th style="width:12%">Variable Type</th><th style="width:12%">Plausible Range</th><th style="width:16%">Note</th><th style="width:20%">Codelist</th></tr>${varRows}</table>`:"<p>[TO BE SPECIFIED — use 'Load Common Variables' in builder]</p>"}
 
 <h2>7. Other Considerations</h2>
 ${S.considerations.data_sources_note?`<p><strong>Data Sources by Variable Type:</strong> ${S.considerations.data_sources_note}</p>`:""}
