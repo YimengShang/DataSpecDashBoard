@@ -226,7 +226,7 @@ const S={
   // feasibility checks (toggled list)
   feasibility:[],
   // variables: array of {name, definition, type, note, codelist, range}
-  variables:[],
+  variables:[{name:"PATID",definition:"Patient ID",type:"ID",note:"",codelists:[],range:"",cat:"ID"}],
   // nco
   nco:{nco_source:"",nco_note:"",nco_datasets:""},
   // considerations
@@ -312,7 +312,7 @@ const VAR_CATS=["ID","Treatment","Dates","Outcomes","Demographics","Lab Values",
 const PRELOAD_FILES=[
   {name:"A1C loinc.txt", label:"A1C loinc.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCtvMvE7BwCSJHO90rmj6H2Aa6X4T5vn21ikzSY90d7rUA?e=wNAu5m"},
   {name:"All GLP.txt", label:"All GLP.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQDhT0msDywYSIh41sR0yrURAT33DDInosfEMtfR4LeyYr0?e=pejfVk"},
-  {name:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", label:"Anti_Androgen_PCOS_NDC_Master_Updated.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
+  {name:"Anti_Androgen_PCOS_NDC_Master.xlsx", label:"Anti_Androgen_PCOS_NDC_Master.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
   {name:"Antihyperglycemic_NDC_Code_List.xlsx", label:"Antihyperglycemic_NDC_Code_List.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDodL9Q9hupSoXwL-loql98ATZyGxTIeR2HnDHhRdZHDs4?e=dy0UU4"},
   {name:"AOMs_execpt_GLP1.xlsx", label:"AOMs_execpt_GLP1.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDEBA9o9R7pT5hFeSyH7hVLAWTZ22sJ3cv2qt6qRuipYnw?e=Johnsq"},
   {name:"Biomarkers_Diab_Obes.xlsx", label:"Biomarkers_Diab_Obes.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBiUeLIUj8sQrvDIY6kKtckAYwv2JudkfLNA-GgKn9Ycos?e=Ee9VF1"},
@@ -351,20 +351,29 @@ function rCodelistCell(v,i){
     const ucl=S.codelists[name];
     const href=pf?(pf.url||'preload codelist/'+name):ucl?.url||"";
     const label=pf?pf.label:ucl?.label||name;
-    return `<div style="display:inline-flex;align-items:center;gap:4px;background:#E8F2FA;border:1px solid #B0CFE8;border-radius:12px;padding:2px 8px 2px 10px;font-size:11px;color:#003D73;margin:2px">
-      ${href?`<a href="${esc(href)}" target="_blank" style="color:#003D73;text-decoration:none">${esc(label)}</a>`:`<span>${esc(label)}</span>`}
-      <button onclick="removeCodelist(${i},${ti})" style="background:none;border:none;cursor:pointer;color:#888;font-size:12px;line-height:1;padding:0 0 0 2px" title="Remove">×</button>
+    const short=label.replace(/\.[^.]+$/,'').slice(0,18)+(label.replace(/\.[^.]+$/,'').length>18?'…':'');
+    return `<div style="display:inline-flex;align-items:center;gap:4px;background:#E8F2FA;border:1px solid #B0CFE8;border-radius:12px;padding:2px 8px 2px 10px;font-size:11px;color:#003D73;margin:2px;max-width:130px" title="${esc(label)}">
+      ${href?`<a href="${esc(href)}" target="_blank" style="color:#003D73;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(short)}</a>`:`<span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(short)}</span>`}
+      <button onclick="removeCodelist(${i},${ti})" style="background:none;border:none;cursor:pointer;color:#888;font-size:12px;line-height:1;padding:0 0 0 2px;flex-shrink:0" title="Remove">×</button>
     </div>`;
   }).join("");
 
-  const dropdown=`<select onchange="handleCodelistSelect(this,${i})" style="margin-top:${cls.length?'4':'0'}px">
+  const dropdown=`<select onchange="handleCodelistSelect(this,${i})" style="margin-top:${cls.length?'4':'0'}px;max-width:140px;font-size:11px">
     <option value="" disabled selected>Add codelist…</option>
     <option value="__preload__">📁 Preload Files…</option>
     ${clKeys.length>0?`<optgroup label="📂 Uploaded">${clKeys.map(f=>`<option value="${esc(f)}">${S.codelists[f].url?"🔗":S.codelists[f].refOnly?"📎":"📄"} ${esc(S.codelists[f].label||f)}${S.codelists[f].refOnly||S.codelists[f].url?"":" ("+S.codelists[f].count+")"}</option>`).join("")}</optgroup>`:""}
     <option value="__upload__">📂 Upload…</option>
   </select>`;
 
-  return `<div>${tags}</div>${dropdown}`;
+  const sug=v._clSuggest;
+  const sugShort=sug?(sug.replace(/\.[^.]+$/,'').slice(0,18)+(sug.replace(/\.[^.]+$/,'').length>18?'…':'')):'';
+  const sugBadge=sug?`<div style="display:inline-flex;align-items:center;gap:5px;background:#FFF8E1;border:1px solid #FFD54F;border-radius:12px;padding:2px 8px 2px 10px;font-size:11px;color:#6D4C0A;margin:2px;max-width:130px" title="${esc(sug)}">
+    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">✨ ${esc(sugShort)}</span>
+    <button onclick="acceptClSuggest(${i})" style="background:#FFD54F;border:none;cursor:pointer;border-radius:8px;padding:1px 6px;font-size:11px;color:#3E2700;font-weight:700;flex-shrink:0" title="Add this codelist">Add</button>
+    <button onclick="dismissClSuggest(${i})" style="background:none;border:none;cursor:pointer;color:#888;font-size:12px;padding:0 0 0 2px;flex-shrink:0" title="Dismiss">×</button>
+  </div>`:"";
+
+  return `<div style="max-width:160px">${tags}${sugBadge}</div>${dropdown}`;
 }
 function handleCodelistSelect(sel,i){
   const val=sel.value;
@@ -396,7 +405,7 @@ function rVarTable(){
     <input type="file" id="codelistUpload" accept=".txt,.csv,.tsv,.xlsx" multiple style="display:none" onchange="handleCodelistUpload(this)">
   </div>
   <table class="vtbl">
-    <tr><th style="width:130px">Variable Name</th><th>Definition</th><th style="width:110px">Variable Type</th><th style="width:105px">Plausible Range</th><th>Note</th><th>Codelist</th><th style="width:30px"></th></tr>`;
+    <tr><th style="width:130px">Variable Name</th><th>Definition</th><th style="width:110px">Variable Type</th><th style="width:105px">Plausible Range</th><th>Note</th><th style="width:160px">Codelist</th><th style="width:30px"></th></tr>`;
   let lastCat=null;
   const VAR_TYPES=["Continuous","Binary","Categorical","Date","ID","Other"];
   S.variables.forEach((v,i)=>{
@@ -406,12 +415,12 @@ function rVarTable(){
     }
     const showRange=(v.type||"")==="Continuous" && v.cat!=="Outcomes";
     h+=`<tr>
-      <td><input value="${esc(v.name)}" placeholder="var_name" oninput="S.variables[${i}].name=this.value;rPrev()"></td>
+      <td><input value="${esc(v.name)}" placeholder="var_name" oninput="S.variables[${i}].name=this.value;rPrev()" onchange="autoMatchCodelist(${i})"></td>
       <td><input value="${esc(v.definition)}" placeholder="Definition..." oninput="S.variables[${i}].definition=this.value"></td>
       <td><select oninput="S.variables[${i}].type=this.value;rMain()"><option value="" disabled ${v.type?"":"selected"}>Select…</option>${VAR_TYPES.map(t=>`<option value="${t}"${v.type===t?" selected":""}>${t}</option>`).join("")}</select></td>
       <td>${showRange?`<input value="${esc(v.range)}" placeholder="e.g. 9–100" oninput="S.variables[${i}].range=this.value">`:`<span style="color:#bbb;font-size:11px;padding:4px 7px;display:block">—</span>`}</td>
       <td><input value="${esc(v.note)}" placeholder="Note..." oninput="S.variables[${i}].note=this.value"></td>
-      <td>${rCodelistCell(v,i)}</td>
+      <td>${((v.type||"")==="Date"||(v.type||"")==="ID"||v.cat==="Demographics")?`<span style="color:#bbb;font-size:11px;padding:4px 7px;display:block">—</span>`:rCodelistCell(v,i)}</td>
       <td><button class="del-var" onclick="delVar(${i})" title="Delete">×</button></td>
     </tr>`;
   });
@@ -446,6 +455,38 @@ function addVar(){
   rMain();
 }
 function delVar(i){S.variables.splice(i,1);rMain();}
+function _autoMatchOne(i){
+  const v=S.variables[i];
+  const raw=v.name.trim();
+  if(!raw)return;
+  const tokens=raw.replace(/([a-z])([A-Z])/g,'$1 $2').replace(/[_\-]/g,' ').toLowerCase().split(/\s+/).filter(t=>t.length>2);
+  if(!tokens.length)return;
+  let best=null,bestScore=0;
+  PRELOAD_FILES.forEach(pf=>{
+    const fname=pf.name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').toLowerCase();
+    let score=0;
+    tokens.forEach(tok=>{if(fname.includes(tok))score++;});
+    if(score>bestScore){bestScore=score;best=pf;}
+  });
+  if(!best||bestScore===0)return;
+  if(!Array.isArray(v.codelists))v.codelists=v.codelist?[v.codelist]:[];
+  if(v.codelists.includes(best.name)||v._clSuggest===best.name)return;
+  v._clSuggest=best.name;
+}
+function autoMatchCodelist(i){_autoMatchOne(i);rMain();}
+function acceptClSuggest(i){
+  const v=S.variables[i];
+  const sug=v._clSuggest;
+  if(!sug)return;
+  if(!Array.isArray(v.codelists))v.codelists=[];
+  if(!v.codelists.includes(sug))v.codelists.push(sug);
+  delete v._clSuggest;
+  rMain();rPrev();
+}
+function dismissClSuggest(i){
+  delete S.variables[i]._clSuggest;
+  rMain();
+}
 function addDefaultVars(){
   const defaults=[
     {name:"PATID",definition:"Patient ID",type:"ID",note:"",codelists:[],range:"",cat:"ID"},
@@ -473,7 +514,9 @@ function addDefaultVars(){
     {name:"Statin",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
     {name:"Anticoagulants",definition:"Yes/No in baseline period",type:"Binary",note:"",codelists:[],range:"",cat:"Medication"},
   ];
+  const before=new Set(S.variables.map(v=>v.name));
   S.variables=[...S.variables,...defaults.filter(d=>!S.variables.some(v=>v.name===d.name))];
+  S.variables.forEach((v,i)=>{if(!before.has(v.name))_autoMatchOne(i);});
   rMain();rPrev();
 }
 function handleCodelistUpload(input,varIdx){
