@@ -107,6 +107,20 @@ select,input,textarea{font-family:inherit;font-size:13px;color:#222;box-sizing:b
 .feas-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 .feas-btn{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #C8DDF0;background:#fff;color:#666}
 .feas-btn.on{border-color:#0060A9;background:#E8F2FA;color:#0060A9;font-weight:700}
+.arm-card{border:1px solid #C8DDF0;border-radius:8px;padding:14px;margin-bottom:10px;background:#FAFCFF;position:relative}
+.arm-card-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.arm-pri{width:26px;height:26px;border-radius:50%;background:#003D73;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.arm-move{display:flex;flex-direction:column;gap:2px;margin-left:auto}
+.arm-move button{width:24px;height:20px;border:1px solid #C8DDF0;background:#fff;cursor:pointer;font-size:10px;border-radius:4px;color:#003D73}
+.arm-move button:hover{background:#E8F2FA}
+.arm-del{position:absolute;top:10px;right:10px;width:26px;height:26px;border-radius:50%;border:1px solid #FFCDD2;background:#FFEBEE;color:#C62828;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.arm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.arm-grid .fgg{display:flex;flex-direction:column;gap:4px}
+.arm-grid .s2{grid-column:span 2}
+.conflict-opts{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.conflict-btn{padding:5px 11px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid #C8DDF0;background:#fff;color:#666}
+.conflict-btn.on{border-color:#0060A9;background:#E8F2FA;color:#0060A9;font-weight:700}
+.post-idx-grid{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -222,7 +236,7 @@ const S={
   // outcomes
   outcomes:{primary_outcome:"",secondary_outcomes:"",treatment_arm:"",comparator_arm:"",treatment_note:""},
   // algorithm
-  algorithm:{steps:"",notes:""},
+  algorithm:{steps:"",notes:"",gapTolerance:"45",noStockpiling:false,arms:[],conflict:{mode:"priority",washout:""},postIndex:{switching:false,augmentation:false,doseEscalation:false,discontGap:"45"}},
   // feasibility checks (toggled list)
   feasibility:[],
   // variables: array of {name, definition, type, note, codelist, range}
@@ -237,6 +251,9 @@ const S={
   specOut:"",showOut:false,generating:false,
 };
 document.getElementById("mdate").value=S.meta.date;
+
+const SAVE_KEY="dataSpecState";
+function saveState(){try{const o=Object.assign({},S);delete o.specOut;delete o.showOut;delete o.generating;localStorage.setItem(SAVE_KEY,JSON.stringify(o));}catch(e){}}
 
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
 function p(n,d){return d?Math.round(n/d*100):0;}
@@ -274,6 +291,7 @@ function secComp(k){
   if(k==="feasibility")return S.feasibility.length>0?100:0;
   if(k==="variables")return S.variables.filter(v=>v.name.trim()).length>0?100:0;
   if(k==="nco")return S.nco.nco_source?100:0;
+  if(k==="algorithm"){const A=S.algorithm;let f=0,t=2;if(A.steps&&A.steps.trim())f++;if(A.arms.filter(a=>a.name.trim()).length>0)f++;t+=A.arms.length*2;f+=A.arms.reduce((s,a)=>(a.name.trim()?1:0)+(a.drugList.trim()?1:0)+s,0);return p(f,t||1);}
   const obj=S[k];if(!obj||typeof obj!=="object")return 0;
   const vals=Object.values(obj).filter(v=>typeof v==="string");
   return p(vals.filter(v=>v.trim()).length,vals.length||1);
@@ -620,20 +638,90 @@ function rOutcomes(){
     <div class="fgg s2"><label class="fl">Treatment Arms (list all pairwise comparisons)</label>
       <textarea class="fi" rows="3" placeholder="e.g. (1) Overall GLP-1 vs SoC, (2) Tirzepatide vs SoC, (3) Sema vs SoC, (4) TZP+SEMA vs SoC..." oninput="${onchg('treatment_arm')}">${esc(O.treatment_arm)}</textarea></div>
     <div class="fgg s2"><label class="fl">Treatment Arm Definition</label>
-      <textarea class="fi" rows="3" placeholder="e.g. Treatment group: ≥1 treatment drug Rx during index period. t0 = first Rx date. See codelist." oninput="${onchg('comparator_arm')}">${esc(O.comparator_arm)}</textarea></div>
+      <textarea class="fi" rows="3" placeholder="e.g. Treatment group: ≥1 treatment drug Rx during index period. t0 = first Rx date. See codelist." oninput="${onchg('treatment_note')}">${esc(O.treatment_note)}</textarea></div>
     <div class="fgg s2"><label class="fl">Comparator / SoC Definition</label>
-      <textarea class="fi" rows="3" placeholder="e.g. SoC: ≥1 qualifying SoC drug but no treatment drug. t0 = first SoC date. No overlap between groups." oninput="${onchg('treatment_note')}">${esc(O.treatment_note)}</textarea></div>
+      <textarea class="fi" rows="3" placeholder="e.g. SoC: ≥1 qualifying SoC drug but no treatment drug. t0 = first SoC date. No overlap between groups." oninput="${onchg('comparator_arm')}">${esc(O.comparator_arm)}</textarea></div>
   </div>`;
 }
 function rAlgorithm(){
   const A=S.algorithm;
-  return`<div class="sec-sub">Cohort Construction Algorithm</div>
+  const LOGIC_OPTS=[{v:"any",l:"ANY — at least 1 Rx from list"},{v:"all",l:"ALL (concomitant) — every listed drug within window"},{v:"sequential",l:"SEQUENTIAL — Drug A then B within window"},{v:"none",l:"NONE (exclusionary) — zero Rx for listed drugs"}];
+  const IDX_OPTS=[{v:"first_rx",l:"First qualifying Rx"},{v:"combo_met",l:"Date combo criteria met"},{v:"switch_date",l:"Switch / add-on date"},{v:"custom",l:"Custom (specify below)"}];
+  const ARM_TYPES=[{v:"treatment",l:"Treatment"},{v:"comparator",l:"Comparator"},{v:"reference",l:"Reference"}];
+
+  let h=`<div class="sec-sub">Cohort Construction Algorithm</div>
   <div class="fgg s2" style="margin-bottom:12px"><label class="fl">Step-by-Step Pseudo Algorithm</label>
-    <textarea class="fi" rows="10" placeholder="Step 1: Identify all subjects with SOC or treatment drug Rx during index period.\nStep 2: Assign treatment arm — subjects with ≥1 treatment drug Rx.\n  Note: Index date = first treatment drug Rx date.\nStep 3: Remaining subjects assigned to SoC arm.\n  Note: Index date = first SoC Rx date.\nStep 4: Apply eligibility criteria at index date for final cohort." oninput="S.algorithm.steps=this.value;rPrev()">${esc(A.steps)}</textarea></div>
-  <div class="sec-sub">Matching / Analysis Strategy Notes</div>
-  <div class="fgg s2"><label class="fl">PSM / Weighting Notes (for analysis)</label>
-    <textarea class="fi" rows="4" placeholder="e.g. 1:1 PSM with greedy nearest-neighbor matching, caliper 0.1 SD of logit PS. Matching variables: age, sex, race, CCI, BMI, comorbidities, baseline medications..." oninput="S.algorithm.notes=this.value">${esc(A.notes)}</textarea></div>`;
+    <textarea class="fi" rows="10" placeholder="Step 1: Identify all subjects with SOC or treatment drug Rx during index period.\nStep 2: Assign treatment arm — subjects with ≥1 treatment drug Rx.\n  Note: Index date = first treatment drug Rx date.\nStep 3: Remaining subjects assigned to SoC arm.\n  Note: Index date = first SoC Rx date.\nStep 4: Apply eligibility criteria at index date for final cohort." oninput="S.algorithm.steps=this.value;rPrev()">${esc(A.steps)}</textarea></div>`;
+
+  h+=`<div class="sec-sub">Treatment Arms (Waterfall)</div>
+  <div style="font-size:11px;color:#666;margin-bottom:8px">Arms are evaluated top-to-bottom. Most specific arm first — patients are assigned to the first arm they qualify for.</div>`;
+  A.arms.forEach((arm,i)=>{
+    const pre=`S.algorithm.arms[${i}]`;
+    const showSeqWin=arm.logic==="sequential";
+    const showConcom=arm.logic==="all";
+    const showCustom=arm.indexRule==="custom";
+    h+=`<div class="arm-card">
+      <div class="arm-card-hdr">
+        <div class="arm-pri">${i+1}</div>
+        <input class="fi" style="flex:1;font-weight:700" value="${esc(arm.name)}" placeholder="Arm name (e.g. Tirzepatide monotherapy)" oninput="${pre}.name=this.value;rPrev()">
+        <select class="fi" style="width:130px" onchange="${pre}.type=this.value;rPrev()">${ARM_TYPES.map(t=>`<option value="${t.v}"${arm.type===t.v?" selected":""}>${t.l}</option>`).join("")}</select>
+        <div class="arm-move">
+          <button onclick="moveArm(${i},-1)" ${i===0?"disabled":""}title="Move up">&#9650;</button>
+          <button onclick="moveArm(${i},1)" ${i===A.arms.length-1?"disabled":""}title="Move down">&#9660;</button>
+        </div>
+        <button class="arm-del" onclick="delArm(${i})" title="Remove arm">&times;</button>
+      </div>
+      <div class="arm-grid">
+        <div class="fgg s2"><label class="fl">Drug List</label>
+          <textarea class="fi" rows="2" placeholder="e.g. Tirzepatide (Mounjaro, Zepbound); or reference a codelist" oninput="${pre}.drugList=this.value;rPrev()">${esc(arm.drugList)}</textarea></div>
+        <div class="fgg"><label class="fl">Logic Operator</label>
+          <select class="fi" onchange="${pre}.logic=this.value;rMain();rPrev()">${LOGIC_OPTS.map(o=>`<option value="${o.v}"${arm.logic===o.v?" selected":""}>${o.l}</option>`).join("")}</select></div>
+        <div class="fgg"><label class="fl">Min Rx Count</label>
+          <input class="fi" type="number" min="1" value="${esc(arm.minRx)}" oninput="${pre}.minRx=this.value;rPrev()"></div>
+        ${showSeqWin?`<div class="fgg"><label class="fl">Gap Tolerance (days)</label>
+          <input class="fi" type="number" placeholder="180" value="${esc(arm.window)}" oninput="${pre}.window=this.value;rPrev()">
+          <div style="font-size:10px;color:#888;margin-top:2px">Max gap between sequential drugs</div></div>`:""}
+        ${showConcom?`<div class="fgg"><label class="fl">Min Overlap Duration</label>
+          <div style="display:flex;gap:6px"><input class="fi" type="number" min="0" style="flex:1" placeholder="e.g. 4" value="${esc(arm.minOverlap)}" oninput="${pre}.minOverlap=this.value;rPrev()">
+          <select class="fi" style="width:90px" onchange="${pre}.minOverlapUnit=this.value;rPrev()"><option value="days"${arm.minOverlapUnit==="days"?" selected":""}>days</option><option value="months"${arm.minOverlapUnit==="months"?" selected":""}>months</option></select></div>
+          <div style="font-size:10px;color:#888;margin-top:2px">How long must both drugs have overlapping days supply</div></div>
+        <div class="fgg"><label class="fl">Anchor Drug</label>
+          <input class="fi" value="${esc(arm.anchorDrug)}" placeholder="e.g. SGLT2i or SOC" oninput="${pre}.anchorDrug=this.value;rPrev()">
+          <div style="font-size:10px;color:#888;margin-top:2px">Base drug that must be used prior to overlap</div></div>
+        <div class="fgg"><label class="fl">Prior Use of Anchor Drug</label>
+          <div style="display:flex;gap:6px"><input class="fi" type="number" min="0" style="flex:1" placeholder="e.g. 3" value="${esc(arm.priorUse)}" oninput="${pre}.priorUse=this.value;rPrev()">
+          <select class="fi" style="width:90px" onchange="${pre}.priorUseUnit=this.value;rPrev()"><option value="days"${arm.priorUseUnit==="days"?" selected":""}>days</option><option value="months"${arm.priorUseUnit==="months"?" selected":""}>months</option></select></div>
+          <div style="font-size:10px;color:#888;margin-top:2px">How long the anchor drug must be used continuously before overlap begins</div></div>
+        <div style="font-size:10px;color:#0060A9;background:#E8F2FA;padding:5px 8px;border-radius:4px;grid-column:span 2">Concomitant: drugs must have overlapping days supply${arm.minOverlap?" for ≥"+arm.minOverlap+" "+(arm.minOverlapUnit||"months"):""}${arm.anchorDrug?". Anchor: "+arm.anchorDrug+(arm.priorUse?" (≥"+arm.priorUse+" "+(arm.priorUseUnit||"months")+" prior use)":""):""}</div>`:""}
+        <div class="fgg"><label class="fl">Index Date Rule</label>
+          <select class="fi" onchange="${pre}.indexRule=this.value;rMain();rPrev()">${IDX_OPTS.map(o=>`<option value="${o.v}"${arm.indexRule===o.v?" selected":""}>${o.l}</option>`).join("")}</select></div>
+        ${showCustom?`<div class="fgg s2"><label class="fl">Custom Index Date Rule</label>
+          <input class="fi" value="${esc(arm.indexCustom||"")}" placeholder="Describe custom index date logic" oninput="${pre}.indexCustom=this.value;rPrev()"></div>`:""}
+      </div>
+    </div>`;
+  });
+  h+=`<button class="add-btn" style="width:100%;margin-top:4px" onclick="addArm()">+ Add Treatment Arm</button>`;
+
+  const P=A.postIndex;
+  const anyPost=P.switching||P.augmentation||P.doseEscalation;
+  h+=`<div class="sec-sub">Post-Index Tracking (Optional)</div>
+  <div class="post-idx-grid">
+    <button class="feas-btn${P.switching?" on":""}" onclick="S.algorithm.postIndex.switching=!S.algorithm.postIndex.switching;rMain();rPrev()">Switching</button>
+    <button class="feas-btn${P.augmentation?" on":""}" onclick="S.algorithm.postIndex.augmentation=!S.algorithm.postIndex.augmentation;rMain();rPrev()">Augmentation / Add-on</button>
+    <button class="feas-btn${P.doseEscalation?" on":""}" onclick="S.algorithm.postIndex.doseEscalation=!S.algorithm.postIndex.doseEscalation;rMain();rPrev()">Dose Escalation</button>
+  </div>`;
+  if(anyPost){
+    h+=`<div class="fg" style="margin-top:10px">
+      <div class="fgg"><label class="fl">Discontinuation Gap Days</label>
+        <input class="fi" type="number" value="${esc(P.discontGap)}" placeholder="45" oninput="S.algorithm.postIndex.discontGap=this.value;rPrev()"></div>
+    </div>`;
+  }
+
+  return h;
 }
+function addArm(){S.algorithm.arms.push({name:"",type:"treatment",drugList:"",logic:"any",window:"",minRx:"1",indexRule:"first_rx",indexCustom:"",minOverlap:"",minOverlapUnit:"months",priorUse:"",priorUseUnit:"months",anchorDrug:""});rMain();rPrev();}
+function delArm(i){S.algorithm.arms.splice(i,1);rMain();rPrev();}
+function moveArm(i,dir){const a=S.algorithm.arms;if(i+dir<0||i+dir>=a.length)return;const t=a[i];a[i]=a[i+dir];a[i+dir]=t;rMain();rPrev();}
 function rNCO(){
   const N=S.nco;
   const onchg=(k)=>`S.nco['${k}']=this.value;rPrev()`;
@@ -853,6 +941,15 @@ ${S.outcomes.treatment_note?`<p><strong>Comparator / SoC Definition:</strong> ${
 <pre style="font-family:Arial;font-size:10pt;white-space:pre-wrap;background:#F5F8FC;padding:10pt;border:1pt solid #D1E3F3">${S.algorithm.steps||"[TO BE SPECIFIED]"}</pre>
 ${S.algorithm.notes?`<h3>PSM / Analysis Notes</h3><p>${S.algorithm.notes}</p>`:""}
 
+${S.algorithm.arms.length?`<h3>Treatment Assignment Waterfall</h3>
+<p style="font-size:10pt;color:#555">Arms evaluated top-to-bottom; patients assigned to first qualifying arm (conflict mode: ${S.algorithm.conflict.mode}).</p>
+<div class="note-box"><strong>Drug Continuity Rule:</strong> Gap Tolerance = ${S.algorithm.gapTolerance||"45"} days${S.algorithm.noStockpiling?" · No Stockpiling":""}</div>
+<table class="vt"><tr><th style="width:5%">#</th><th style="width:16%">Arm Name</th><th style="width:10%">Type</th><th style="width:20%">Drug List</th><th style="width:10%">Logic</th><th style="width:14%">Min Overlap</th><th style="width:7%">Min Rx</th><th style="width:18%">Index Date</th></tr>
+${S.algorithm.arms.map((arm,i)=>`<tr style="background:${i%2===0?"#F5F8FC":"#fff"}"><td style="padding:5pt 8pt;font-weight:bold;text-align:center">${i+1}</td><td style="padding:5pt 8pt;font-weight:bold;color:#003D73">${arm.name||"—"}</td><td style="padding:5pt 8pt">${arm.type}</td><td style="padding:5pt 8pt">${arm.drugList||"—"}${arm.logic==="all"&&arm.anchorDrug?"<br><em style='font-size:9pt;color:#555'>Anchor: "+arm.anchorDrug+(arm.priorUse?" (≥"+arm.priorUse+" "+(arm.priorUseUnit||"months")+" prior)":"")+"</em>":""}</td><td style="padding:5pt 8pt;text-transform:uppercase">${arm.logic}</td><td style="padding:5pt 8pt">${arm.logic==="all"&&arm.minOverlap?"≥"+arm.minOverlap+" "+(arm.minOverlapUnit||"months"):arm.logic==="sequential"&&arm.window?arm.window+"d gap":"—"}</td><td style="padding:5pt 8pt">${arm.minRx||"1"}</td><td style="padding:5pt 8pt">${arm.indexRule==="custom"?(arm.indexCustom||"Custom"):arm.indexRule.replace(/_/g," ")}</td></tr>`).join("")}
+</table>
+${S.algorithm.conflict.washout?`<p><strong>Washout Period:</strong> ${S.algorithm.conflict.washout} days</p>`:""}
+${(()=>{const P=S.algorithm.postIndex;const items=[P.switching&&"Switching",P.augmentation&&"Augmentation / Add-on",P.doseEscalation&&"Dose Escalation"].filter(Boolean);if(!items.length)return"";return`<h3>Post-Index Tracking</h3><ul>${items.map(x=>"<li>"+x+"</li>").join("")}</ul><p><strong>Discontinuation Gap:</strong> ${P.discontGap||"45"} days</p>`;})()}`
+:""}
 <h2>4. Feasibility Checks</h2>
 ${feasItems?`<ol>${feasItems}</ol>`:"<p>[TO BE SPECIFIED]</p>"}
 ${S.overview.feasNotes?`<p>${S.overview.feasNotes}</p>`:""}
@@ -955,6 +1052,10 @@ Inclusion Criteria:
 ${inclText}
 Exclusion Criteria:
 ${exclText}
+Treatment Arm Definitions:
+${S.algorithm.arms.map((arm,i)=>"Arm "+(i+1)+": "+(arm.name||"unnamed")+" ("+arm.type+") — Logic: "+arm.logic+", Drugs: "+(arm.drugList||"not specified")+(arm.logic==="all"?", Min Overlap: "+(arm.minOverlap||"not specified")+" "+(arm.minOverlapUnit||"months")+", Anchor Drug: "+(arm.anchorDrug||"not specified")+", Prior Use: "+(arm.priorUse||"not specified")+" "+(arm.priorUseUnit||"months"):"")).join("\n")||"No arms defined"}
+Global Gap Tolerance: ${S.algorithm.gapTolerance||"45"} days${S.algorithm.noStockpiling?" (no stockpiling)":""}
+Conflict Resolution: ${S.algorithm.conflict.mode}${S.algorithm.conflict.washout?", Washout: "+S.algorithm.conflict.washout+" days":""}
 
 Generate a numbered pseudo-algorithm (Step 1, Step 2, etc.) for cohort construction. Include:
 1. Initial patient pool selection
@@ -1008,13 +1109,13 @@ function rPrev(){
   if(S.feasibility.length>0)h+=`<div class="pvs"><div class="pvl">Feasibility Checks</div><div class="pvv">${S.feasibility.length} selected</div></div>`;
   if(S.periods.study_period)h+=`<div class="pvs"><div class="pvl">Study Period</div><div class="pvv">${esc(S.periods.study_period)}</div></div>`;
   if(S.outcomes.primary_outcome)h+=`<div class="pvs"><div class="pvl">Primary Outcome</div><div class="pvv">${esc(S.outcomes.primary_outcome.substring(0,60))}${S.outcomes.primary_outcome.length>60?"...":""}</div></div>`;
+  if(S.algorithm.arms.filter(a=>a.name.trim()).length>0)h+=`<div class="pvs"><div class="pvl">Treatment Arms</div><div class="pvv">${S.algorithm.arms.filter(a=>a.name.trim()).length} defined (${S.algorithm.conflict.mode})</div></div>`;
 
   const vbg=warns.length?"#FFEBEE":"#E8F5E9";const vc=warns.length?CL.R:CL.G;
   h+=`<div class="vbox" style="background:${vbg}"><div class="vt" style="color:${vc}">${warns.length?`❌ ${warns.length} item${warns.length>1?"s":""} missing`:"✓ Ready to generate"}</div>${warns.map(w=>`<div class="vi" style="color:${CL.R}">• ${w}</div>`).join("")}</div>`;
   el.innerHTML=h;
+  saveState();
 }
-
-// PRELOAD FILE PICKER MODAL
 const PRELOAD_TAS=["CMH","Neuroscience","Immunology","Oncology"];
 let _pfVarIdx=null;
 let _pfTA="";
