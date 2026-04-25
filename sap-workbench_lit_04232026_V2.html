@@ -660,19 +660,25 @@ function SectionNav({ active, onSelect, values, studyType, ffpData, secondaryOut
     // Code Lists — based on code_list_ref fill rate across all variables (user + auto)
     if (key === "codelist") {
       const userRows = (() => { try { return JSON.parse(values.codelist?.rows || "[]"); } catch { return []; } })();
-      // Compute auto vars same as render
       const dv2 = values.design || {};
+      const pop2 = values.population || {};
+      const ta2 = values.treatment_arms_section || {};
       const adj2 = values.adjustment || {};
       const stripB = (s) => s.replace(/^[\s•\-\*•\u2023\u25E6\u2043\u2219►▪▸→·]+/, "").replace(/^\d+[.)]\s*/, "").trim();
       const aVars = [];
       const sn = new Set();
       const aa = (v, cat, ct, n) => { const x = stripB(v).trim(); if (x && x.length > 1 && !sn.has(x.toLowerCase())) { sn.add(x.toLowerCase()); aVars.push({ variable: x, code_list_ref: "" }); } };
-      if (dv2.primary_outcome) aa(dv2.primary_outcome);
-      try { JSON.parse(dv2.secondary_outcomes || "[]").forEach(s => { if (s.description) aa(s.description); }); } catch {}
-      if (dv2.treated_arm) aa(dv2.treated_arm.split(/[,;.\n]/)[0]);
-      if (dv2.control_arm) aa(dv2.control_arm.split(/[,;.\n]/)[0]);
-      try { JSON.parse(adj2.baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).forEach(c => aa(c)); }); } catch {}
-      try { JSON.parse(adj2.tv_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).forEach(c => aa(c)); }); } catch {}
+      if (studyType === "heor") {
+        if (ta2.treated_arm) aa(ta2.treated_arm.split(/[,;.\n]/)[0]);
+        if (ta2.control_arm) aa(ta2.control_arm.split(/[,;.\n]/)[0]);
+      } else {
+        if (dv2.primary_outcome) aa(dv2.primary_outcome);
+        try { JSON.parse(dv2.secondary_outcomes || "[]").forEach(s => { if (s.description) aa(s.description); }); } catch {}
+        if (dv2.treated_arm) aa(dv2.treated_arm.split(/[,;.\n]/)[0]);
+        if (dv2.control_arm) aa(dv2.control_arm.split(/[,;.\n]/)[0]);
+        try { JSON.parse(adj2.baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).forEach(c => aa(c)); }); } catch {}
+        try { JSON.parse(adj2.tv_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).forEach(c => aa(c)); }); } catch {}
+      }
       const userSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
       const allRows = [...userRows, ...aVars.filter(a => !userSet.has(a.variable.toLowerCase()))];
       if (allRows.length === 0) return 0;
@@ -2508,6 +2514,7 @@ function SAPWorkbench() {
   const [activeSection, setActiveSection] = useState("design");
   const [meta, setMeta] = useState({ title: "", pangaea_id: "", indication: "", study_type: "", data_source: "", data_version: "", project_statistician: "", statistical_analyst: "", scientist: "", date: new Date().toISOString().split("T")[0] });
   const [values, setValues] = useState({});
+  const [valuesByType, setValuesByType] = useState({});
   const [ffpData, setFfpData] = useState({ selectedSources: [], ffpChecked: [], dataStrategy: "", regulatoryContext: "", parallelSources: "" });
   const [tflSelected, setTflSelected] = useState([]);
   const [checklist, setChecklist] = useState([]);
@@ -2660,7 +2667,7 @@ Only include observations where there is a clear pattern. Use empty arrays for c
 
   const saveWorkbench = () => {
     try {
-      const state = { studyType, activeSection, meta, values, ffpData, tflSelected, checklist, activeGroup, additionalAnalyses, _version: 1, _savedAt: new Date().toISOString() };
+      const state = { studyType, activeSection, meta, values, ffpData, tflSelected, checklist, activeGroup, additionalAnalyses, valuesByType: { ...valuesByType, [studyType]: values }, _version: 2, _savedAt: new Date().toISOString() };
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -2682,6 +2689,11 @@ Only include observations where there is a clear pattern. Use empty arrays for c
         if (state.activeSection) setActiveSection(state.activeSection);
         if (state.meta) setMeta(state.meta);
         if (state.values) setValues(state.values);
+        if (state.valuesByType) {
+          setValuesByType(state.valuesByType);
+        } else if (state.studyType && state.values) {
+          setValuesByType({ [state.studyType]: state.values });
+        }
         if (state.ffpData) setFfpData(state.ffpData);
         if (state.tflSelected) {
           const validIds = new Set([...TFL_LIBRARY.tables, ...TFL_LIBRARY.figures, ...TFL_LIBRARY.listings].map(t => t.id));
@@ -2704,6 +2716,10 @@ Only include observations where there is a clear pattern. Use empty arrays for c
   }, []);
 
   const handleStudyTypeSelect = (type) => {
+    if (studyType && studyType !== type) {
+      setValuesByType(prev => ({ ...prev, [studyType]: values }));
+      setValues(valuesByType[type] || {});
+    }
     setStudyType(type);
     if (type === "regulatory") setActiveSection("ffp");
     else if (type === "heor") setActiveSection("population");
@@ -3837,8 +3853,10 @@ ${body}
       const inferCT = (t) => { const l = t.toLowerCase(); if (/semaglutide|tirzepatide|liraglutide|dulaglutide|exenatide|canagliflozin|dapagliflozin|empagliflozin|ertugliflozin|metformin|insulin|glp-1|sglt2|dpp-4|statin|arb|ace/i.test(l)) return "NDC"; if (/bmi|hba1c|egfr|creatinine|albumin|cholesterol|ldl|hdl|triglycerides|weight|height|blood pressure/i.test(l)) return "LOINC"; if (/cci|charlson|elixhauser/i.test(l)) return "Custom / Algorithm"; if (/hospitalization|dialysis|transplant|pci|cabg/i.test(l)) return "CPT / HCPCS"; return "ICD-10-CM"; };
       const extractCL = (text) => { if (!text) return []; const terms = []; const pats = [/\b(T[12]D[M]?|CKD|COPD|ESRD|ESKD|HF|CHF|AF|NAFLD|NASH|MACE|MI|CVD|CAD)\b/gi, /\b(hypertension|diabetes|obesity|asthma|stroke|cancer|pregnancy|heart failure|chronic kidney disease|hyperlipidemia)\b/gi, /\b(semaglutide|tirzepatide|liraglutide|canagliflozin|dapagliflozin|empagliflozin|metformin|insulin)\b/gi, /\b(GLP-1[- ]?RA?|SGLT2[- ]?i(?:nhibitor)?|statin|ARB|ACE[- ]?i(?:nhibitor)?)\b/gi, /\b(BMI|HbA1c|eGFR|creatinine|cholesterol|LDL|HDL|CCI|Charlson)\b/gi, /\b(hospitalization|dialysis|transplant)\b/gi]; pats.forEach(p => { let m; while ((m = p.exec(text)) !== null) { if (m[0].length > 1) terms.push(m[0].trim()); } }); return [...new Set(terms)]; };
 
-      // Extract from both RWE and feasibility sources — include name AND definition fields
-      const allText = [dv.inclusion_criteria, dv.exclusion_criteria, dv.treated_arm_name, dv.treated_arm, dv.control_arm_name, dv.control_arm, dv.primary_outcome, dv.primary_outcome_definition, (values.population||{}).inclusion_criteria, (values.population||{}).exclusion_criteria, (values.treatment_arms_section||{}).treated_arm_name, (values.treatment_arms_section||{}).treated_arm, (values.treatment_arms_section||{}).control_arm_name, (values.treatment_arms_section||{}).control_arm].filter(Boolean).join("\n");
+      // Extract from active study type sections only
+      const allText = studyType === "heor"
+        ? [(values.population||{}).inclusion_criteria, (values.population||{}).exclusion_criteria, (values.treatment_arms_section||{}).treated_arm_name, (values.treatment_arms_section||{}).treated_arm, (values.treatment_arms_section||{}).control_arm_name, (values.treatment_arms_section||{}).control_arm].filter(Boolean).join("\n")
+        : [dv.inclusion_criteria, dv.exclusion_criteria, dv.treated_arm_name, dv.treated_arm, dv.control_arm_name, dv.control_arm, dv.primary_outcome, dv.primary_outcome_definition].filter(Boolean).join("\n");
       // Also extract from secondary outcome definitions
       try { JSON.parse(dv.secondary_outcomes || "[]").forEach(s => { if (s.definition) extractCL(s.definition).forEach(t => addCl2(t, "Outcome", inferCT(t), "Secondary outcome component")); }); } catch {}
       extractCL(allText).forEach(t => addCl2(t, "Variable", inferCT(t), "Auto-extracted"));
@@ -4717,9 +4735,34 @@ Respond ONLY with a JSON object (no markdown, no backticks, no preamble) with th
                           ...prev.subgroup,
                           subgroups: JSON.stringify(subgroups),
                         },
+                        // ── FEASIBILITY SECTIONS (mirror design fields so Feasibility mode is pre-filled too) ──
+                        population: {
+                          ...prev.population,
+                          inclusion_criteria: pr.inclusion_criteria || "",
+                          exclusion_criteria: pr.exclusion_criteria || "",
+                          continuous_enrollment: JSON.stringify(enrObj),
+                        },
+                        treatment_arms_section: {
+                          ...prev.treatment_arms_section,
+                          treated_arm_name: pr.treated_arm_name || "",
+                          treated_arm: pr.treated_arm || "",
+                          control_arm_name: pr.control_arm_name || "",
+                          control_arm: pr.control_arm || "",
+                        },
+                        index_date_section: {
+                          ...prev.index_date_section,
+                          index_date_treated: Object.keys(idxTreated).length ? JSON.stringify(idxTreated) : prev.index_date_section?.index_date_treated || "",
+                          index_date_control: Object.keys(idxControl).length ? JSON.stringify(idxControl) : prev.index_date_section?.index_date_control || "",
+                        },
+                        study_period_section: {
+                          ...prev.study_period_section,
+                          study_dates: Object.keys(studyDates).length ? JSON.stringify(studyDates) : prev.study_period_section?.study_dates || "",
+                          index_dates: Object.keys(indexDates).length ? JSON.stringify(indexDates) : prev.study_period_section?.index_dates || "",
+                          baseline_window: pr.baseline_window || "",
+                        },
                       }));
                       setShowLitReview(false);
-                      setActiveSection("design");
+                      setActiveSection(studyType === "heor" ? "population" : "design");
                       setActiveGroup("population");
                     }} style={{ padding: "9px 24px", border: "none", borderRadius: 8, background: GREEN, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
                       ✅ Accept & Pre-fill Workbench
