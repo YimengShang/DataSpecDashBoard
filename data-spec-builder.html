@@ -234,7 +234,7 @@ const S={
   inclusion:[],
   exclusion:[],
   // outcomes
-  outcomes:{primary_outcome:"",secondary_outcomes:"",treatment_arm:"",comparator_arm:"",treatment_note:""},
+  outcomes:{primary_outcome:"",secondary_outcomes:""},
   // algorithm
   algorithm:{steps:"",notes:"",gapTolerance:"45",noStockpiling:false,arms:[],conflict:{mode:"priority",washout:""},postIndex:{switching:false,augmentation:false,doseEscalation:false,discontGap:"45"}},
   // feasibility checks (toggled list)
@@ -625,33 +625,19 @@ function rPeriods(){
 }
 function rOutcomes(){
   const O=S.outcomes;
+  const A=S.algorithm;
   const onchg=(k)=>`S.outcomes['${k}']=this.value;rPrev()`;
-  return`<div class="sec-sub">Primary & Secondary Outcomes</div>
+  const LOGIC_OPTS=[{v:"any",l:"ANY — at least 1 Rx from list"},{v:"all",l:"ALL (concomitant) — every listed drug within window"},{v:"sequential",l:"SEQUENTIAL — Drug A then B within window"},{v:"none",l:"NONE (exclusionary) — zero Rx for listed drugs"}];
+  const IDX_OPTS=[{v:"first_rx",l:"First qualifying Rx"},{v:"combo_met",l:"Date combo criteria met"},{v:"switch_date",l:"Switch / add-on date"},{v:"custom",l:"Custom (specify below)"}];
+  const ARM_TYPES=[{v:"treatment",l:"Treatment"},{v:"comparator",l:"Comparator"},{v:"reference",l:"Reference"}];
+
+  let h=`<div class="sec-sub">Primary & Secondary Outcomes</div>
   <div class="fg">
     <div class="fgg s2"><label class="fl">Primary Outcome</label>
       <textarea class="fi" rows="3" placeholder="e.g. Composite of all-cause death, CV hospitalization (AF, stroke, HF, MI)..." oninput="${onchg('primary_outcome')}">${esc(O.primary_outcome)}</textarea></div>
     <div class="fgg s2"><label class="fl">Secondary Outcomes</label>
       <textarea class="fi" rows="3" placeholder="e.g. (1) All-cause death, (2) AF hospitalization alone, (3) Weight change at 6/12/24 months..." oninput="${onchg('secondary_outcomes')}">${esc(O.secondary_outcomes)}</textarea></div>
-  </div>
-  <div class="sec-sub">Treatment Comparisons</div>
-  <div class="fg">
-    <div class="fgg s2"><label class="fl">Treatment Arms (list all pairwise comparisons)</label>
-      <textarea class="fi" rows="3" placeholder="e.g. (1) Overall GLP-1 vs SoC, (2) Tirzepatide vs SoC, (3) Sema vs SoC, (4) TZP+SEMA vs SoC..." oninput="${onchg('treatment_arm')}">${esc(O.treatment_arm)}</textarea></div>
-    <div class="fgg s2"><label class="fl">Treatment Arm Definition</label>
-      <textarea class="fi" rows="3" placeholder="e.g. Treatment group: ≥1 treatment drug Rx during index period. t0 = first Rx date. See codelist." oninput="${onchg('treatment_note')}">${esc(O.treatment_note)}</textarea></div>
-    <div class="fgg s2"><label class="fl">Comparator / SoC Definition</label>
-      <textarea class="fi" rows="3" placeholder="e.g. SoC: ≥1 qualifying SoC drug but no treatment drug. t0 = first SoC date. No overlap between groups." oninput="${onchg('comparator_arm')}">${esc(O.comparator_arm)}</textarea></div>
   </div>`;
-}
-function rAlgorithm(){
-  const A=S.algorithm;
-  const LOGIC_OPTS=[{v:"any",l:"ANY — at least 1 Rx from list"},{v:"all",l:"ALL (concomitant) — every listed drug within window"},{v:"sequential",l:"SEQUENTIAL — Drug A then B within window"},{v:"none",l:"NONE (exclusionary) — zero Rx for listed drugs"}];
-  const IDX_OPTS=[{v:"first_rx",l:"First qualifying Rx"},{v:"combo_met",l:"Date combo criteria met"},{v:"switch_date",l:"Switch / add-on date"},{v:"custom",l:"Custom (specify below)"}];
-  const ARM_TYPES=[{v:"treatment",l:"Treatment"},{v:"comparator",l:"Comparator"},{v:"reference",l:"Reference"}];
-
-  let h=`<div class="sec-sub">Cohort Construction Algorithm</div>
-  <div class="fgg s2" style="margin-bottom:12px"><label class="fl">Step-by-Step Pseudo Algorithm</label>
-    <textarea class="fi" rows="10" placeholder="Step 1: Identify all subjects with SOC or treatment drug Rx during index period.\nStep 2: Assign treatment arm — subjects with ≥1 treatment drug Rx.\n  Note: Index date = first treatment drug Rx date.\nStep 3: Remaining subjects assigned to SoC arm.\n  Note: Index date = first SoC Rx date.\nStep 4: Apply eligibility criteria at index date for final cohort." oninput="S.algorithm.steps=this.value;rPrev()">${esc(A.steps)}</textarea></div>`;
 
   h+=`<div class="sec-sub">Treatment Arms (Waterfall)</div>
   <div style="font-size:11px;color:#666;margin-bottom:8px">Arms are evaluated top-to-bottom. Most specific arm first — patients are assigned to the first arm they qualify for.</div>`;
@@ -722,6 +708,15 @@ function rAlgorithm(){
 function addArm(){S.algorithm.arms.push({name:"",type:"treatment",drugList:"",logic:"any",window:"",minRx:"1",indexRule:"first_rx",indexCustom:"",minOverlap:"",minOverlapUnit:"months",priorUse:"",priorUseUnit:"months",anchorDrug:""});rMain();rPrev();}
 function delArm(i){S.algorithm.arms.splice(i,1);rMain();rPrev();}
 function moveArm(i,dir){const a=S.algorithm.arms;if(i+dir<0||i+dir>=a.length)return;const t=a[i];a[i]=a[i+dir];a[i+dir]=t;rMain();rPrev();}
+function rAlgorithm(){
+  const A=S.algorithm;
+
+  let h=`<div class="sec-sub">Cohort Construction Algorithm</div>
+  <div class="fgg s2" style="margin-bottom:12px"><label class="fl">Step-by-Step Pseudo Algorithm</label>
+    <textarea class="fi" rows="10" placeholder="Step 1: Identify all subjects with SOC or treatment drug Rx during index period.\nStep 2: Assign treatment arm — subjects with ≥1 treatment drug Rx.\n  Note: Index date = first treatment drug Rx date.\nStep 3: Remaining subjects assigned to SoC arm.\n  Note: Index date = first SoC Rx date.\nStep 4: Apply eligibility criteria at index date for final cohort." oninput="S.algorithm.steps=this.value;rPrev()">${esc(A.steps)}</textarea></div>`;
+
+  return h;
+}
 function rNCO(){
   const N=S.nco;
   const onchg=(k)=>`S.nco['${k}']=this.value;rPrev()`;
@@ -795,9 +790,7 @@ ${exclText}
 5. OUTCOMES & TREATMENT
 Primary Outcome: ${S.outcomes.primary_outcome||"Not specified"}
 Secondary Outcomes: ${S.outcomes.secondary_outcomes||"Not specified"}
-Treatment Arms: ${S.outcomes.treatment_arm||"Not specified"}
-Treatment Definition: ${S.outcomes.comparator_arm||"Not specified"}
-Comparator / SoC Definition: ${S.outcomes.treatment_note||"Not specified"}
+Treatment Arms (Waterfall): ${S.algorithm.arms.map((a,i)=>(i+1)+". "+a.name+" ("+a.type+")").join(", ")||"Not specified"}
 
 6. COHORT ALGORITHM
 ${S.algorithm.steps||"Not specified"}
@@ -913,7 +906,7 @@ table{border-collapse:collapse;width:100%;table-layout:fixed}
 ${S.overview.note?`<div class="note-box"><strong>Note:</strong> ${S.overview.note}</div>`:""}
 
 <h2>1. Objectives</h2>
-<p><strong>Primary Objective:</strong> ${S.outcomes.primary_outcome?`Effect of ${S.outcomes.treatment_arm||"[Treatment]"} on ${S.outcomes.primary_outcome||"[Outcome]"}`:S.overview.objective_primary||"[TO BE SPECIFIED]"}</p>
+<p><strong>Primary Objective:</strong> ${S.outcomes.primary_outcome?`Effect of ${S.algorithm.arms.filter(a=>a.type==="treatment").map(a=>a.name).join(", ")||"[Treatment]"} on ${S.outcomes.primary_outcome||"[Outcome]"}`:S.overview.objective_primary||"[TO BE SPECIFIED]"}</p>
 ${S.overview.objective_secondary?`<p><strong>Secondary Objective(s):</strong> ${S.overview.objective_secondary}</p>`:""}
 
 <h2>2. Study Details</h2>
@@ -933,9 +926,7 @@ ${exclRows?`<ol>${exclRows}</ol>`:"<p>[TO BE SPECIFIED]</p>"}
 ${S.outcomes.secondary_outcomes?`<p><strong>Secondary:</strong> ${S.outcomes.secondary_outcomes}</p>`:""}
 
 <h3>Treatment Comparisons</h3>
-<p>${S.outcomes.treatment_arm||"[TO BE SPECIFIED]"}</p>
-${S.outcomes.comparator_arm?`<p><strong>Treatment Definition:</strong> ${S.outcomes.comparator_arm}</p>`:""}
-${S.outcomes.treatment_note?`<p><strong>Comparator / SoC Definition:</strong> ${S.outcomes.treatment_note}</p>`:""}
+${S.algorithm.arms.length?`<p>See Treatment Assignment Waterfall below for ${S.algorithm.arms.length} defined arm(s).</p>`:"<p>[TO BE SPECIFIED — add arms in the Outcomes &amp; Treatment section]</p>"}
 
 <h2>3. Pseudo Algorithm</h2>
 <pre style="font-family:Arial;font-size:10pt;white-space:pre-wrap;background:#F5F8FC;padding:10pt;border:1pt solid #D1E3F3">${S.algorithm.steps||"[TO BE SPECIFIED]"}</pre>
@@ -1042,9 +1033,7 @@ Study Type: ${st?.label||"RWE"}
 Study Title: ${S.meta.title||"Not specified"}
 Data Source: ${S.meta.dataSource||"Not specified"}
 Primary Outcome: ${S.outcomes.primary_outcome||"Not specified"}
-Treatment Arms: ${S.outcomes.treatment_arm||"Not specified"}
-Treatment Definition: ${S.outcomes.comparator_arm||"Not specified"}
-Comparator Definition: ${S.outcomes.treatment_note||"Not specified"}
+Treatment Arms (Waterfall): ${S.algorithm.arms.map((a,i)=>(i+1)+". "+a.name+" ("+a.type+"): "+a.drugList).join("; ")||"Not specified"}
 Study Period: ${S.periods.study_period||"Not specified"}
 Index Period: ${S.periods.index_period||"Not specified"}
 Follow-up: ${S.periods.followup||"Not specified"}
