@@ -24,6 +24,41 @@ const PURPLE_LIGHT = "#F3E5F5";
 const TEAL = "#00695C";
 const TEAL_LIGHT = "#E0F2F1";
 
+// ─── PRELOADED CODELIST FILES (from File_Inventory.csv) ──────────────────────
+const PRELOAD_FILES=[
+  {name:"A1C loinc.txt", label:"A1C loinc.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCtvMvE7BwCSJHO90rmj6H2Aa6X4T5vn21ikzSY90d7rUA?e=wNAu5m"},
+  {name:"All GLP.txt", label:"All GLP.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQDhT0msDywYSIh41sR0yrURAT33DDInosfEMtfR4LeyYr0?e=pejfVk"},
+  {name:"Anti_Androgen_PCOS_NDC_Master.xlsx", label:"Anti_Androgen_PCOS_NDC_Master.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB8mvyxeA9ESqsI-sNXprWuAeTiNgGVcg4_-Sq5tm3WaBA?e=UlSZYm"},
+  {name:"Antihyperglycemic_NDC_Code_List.xlsx", label:"Antihyperglycemic_NDC_Code_List.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDodL9Q9hupSoXwL-loql98ATZyGxTIeR2HnDHhRdZHDs4?e=dy0UU4"},
+  {name:"AOMs_execpt_GLP1.xlsx", label:"AOMs_execpt_GLP1.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDEBA9o9R7pT5hFeSyH7hVLAWTZ22sJ3cv2qt6qRuipYnw?e=Johnsq"},
+  {name:"Biomarkers_Diab_Obes.xlsx", label:"Biomarkers_Diab_Obes.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBiUeLIUj8sQrvDIY6kKtckAYwv2JudkfLNA-GgKn9Ycos?e=Ee9VF1"},
+  {name:"BMI LOINC.txt", label:"BMI LOINC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBL18GgLMZVTZy4fVZF0l3gAapcmXbJCQlV9MepqEF3LFk?e=p1GFtp"},
+  {name:"BMI Z codes FULL RANGE.txt", label:"BMI Z codes FULL RANGE.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCQvfvydb1UQK-pkgCWYIXlAQZ3QS0D50BEMthXBvZZkFM?e=4Y4fce"},
+  {name:"codes_ORC.xlsx", label:"codes_ORC.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQA05K8sA15VRrTvlm5zWXm5AYw5FHo9w9p13alfW17MmT4?e=zw5hiQ"},
+  {name:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", label:"DIA_STANDARD_MED_Anti_Diabetic_Medication_List_NDC_V7.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBe6aqBvuqDQpS7IGeihawRAUocg9ShiAjxNmhSlI51FgQ?e=787OhW"},
+  {name:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", label:"DIA_STANDARD_MED_Antihypertensive Medication Code List_V5.xlsb", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQBKzO6BEA-BRIvEI0oxXYVBAUJWN51bkgjyqpMrVlcT9Q4?e=1HyZyU"},
+  {name:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", label:"DIA_STANDARD_MED_Hyperlipidemia Medication Code List_V5.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAcMV7z5zDXQ55isnq1lQ6_AamTjh_iBpgfrELs1VRhF6Y?e=7OPvTX"},
+  {name:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", label:"DIA_STANDARD_MED_Obesity_Medication Code List_V6.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCjwI04jJGjQYCojEaCNe50ARMERqpLSJkyXqc7TPF98vU?e=mrft90"},
+  {name:"Diab_drug_amylin.xlsx", label:"Diab_drug_amylin.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCZ5uxRDn9SQKRdk9NO0YSyAb31h17lRMrpzqpj600k9DE?e=jqdUXi"},
+  {name:"Diab_drug_exl_GLP.xlsx", label:"Diab_drug_exl_GLP.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQB_fNW_ulRPTpYHTfwDK875AZX_2unyvWf3LpiF6b_MrCg?e=A5Wqzx"},
+  {name:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", label:"Diagnosis - Type 1 Diabetes T1D ICD-10.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBSsP7NmBfRQYJKB7fFK1xtAaS_WIAO1E62THfDwYNEJ9I?e=O1fdmH"},
+  {name:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", label:"Diagnosis - Type 2 diabetes T2D ICD-10.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQAP22UYjvhPQLnp8DBOGGKxAXCVpSlEVGpAN9c7Jvy1QPk?e=VgyNS8"},
+  {name:"Gest DM.txt", label:"Gest DM.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBfUHmcfZeKSrEmxPDEC2N0AR1bEnoZ_orXZBegQm0mGY8?e=9dX7Lb"},
+  {name:"Hormonal_Contraception_Claims_Code_List.xlsx", label:"Hormonal_Contraception_Claims_Code_List.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAIzvO7o5NdSohXQxaSB9zVAUazbgkdZ7mxOh23tLe1jPc?e=3UN7VS"},
+  {name:"MOunjaro.txt", label:"MOunjaro.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCRjYnJcQHQR6-WUoTh3diJATGoZoFDVpY72nN8wscQi18?e=UgHvEb"},
+  {name:"NDC_SGLT2_Inhibitors_All.xlsx", label:"NDC_SGLT2_Inhibitors_All.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQAXonfUpRV4Srb1hbwYpwpkAUjwOsosGbNEGczlo7q2W4Q?e=Tp9NQg"},
+  {name:"non-GLP1_AOM.xlsx", label:"non-GLP1_AOM.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQCKVqQN2iKJTLyVq4wFAVdYAenQHjwsxeL6sO-6NofTqlo?e=wr4HDA"},
+  {name:"ORCs.xlsx", label:"ORCs.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDJwXPqOLo1RI6ZWq7--fYBAeb8fAdhSwfP0vXKkqdvnFo?e=j7hqy8"},
+  {name:"Other Diabetes.txt", label:"Other Diabetes.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQARrNuLQKnIToVia8eyveXbAdNic4Pfg1TlPXKAoziEb80?e=N8Jm7l"},
+  {name:"Saxenda NDC.txt", label:"Saxenda NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQCnpr77jo07QoiBQDCL9LH2AW6Wq6ly09959FwfLtDO65g?e=ABWv3V"},
+  {name:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", label:"Sulfonylurea_NDC_Codes_No_Dash.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQABeCMpKjrBRJ9DOKgmJ9zCAR_6IvHii7dXMGCxEEx79DA?e=f9msgh"},
+  {name:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", label:"T2D Diabetes Treatment Code List April 2026_Kendra_OFGproject.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDNEZbyUlYNQbxHp03G4TETAd7Z79puvQ29hTzL2QkKqDo?e=L7nSjX"},
+  {name:"TZD_NDC_Codes_No_Dash.xlsx", label:"TZD_NDC_Codes_No_Dash.xlsx", ta:"CMH", url:"https://collab.lilly.com/:x:/s/CMHRWEprojectcodelist/IQDyCN2URW8sR5718vwS8zroAZ3qQ9g_cNQ-wEewmuaYhUg?e=mkWrYP"},
+  {name:"Wegovy NDC.txt", label:"Wegovy NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQBx0g1R_3oTTb4BbMe9biArAZIkK3yhoth7sdAMTYlte90?e=aNVpVq"},
+  {name:"Zepbound NDC.txt", label:"Zepbound NDC.txt", ta:"CMH", url:"https://collab.lilly.com/:t:/s/CMHRWEprojectcodelist/IQALgW2ysPUlRLU9HxR6u4asAaZ_PgkE1MBsaf-1LRQrZEE?e=GR8v51"},
+];
+const PRELOAD_TAS=["CMH","Neuroscience","Immunology","Oncology"];
+
 // ─── STUDY TYPES ──────────────────────────────────────────────────────────────
 
 // ─── PREFERENCE AGENT ────────────────────────────────────────────────────────
@@ -680,9 +715,13 @@ function SectionNav({ active, onSelect, values, studyType, ffpData, secondaryOut
         try { JSON.parse(adj2.tv_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).forEach(c => aa(c)); }); } catch {}
       }
       const userSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
-      const allRows = [...userRows, ...aVars.filter(a => !userSet.has(a.variable.toLowerCase()))];
+      const autoLinkedMap = (() => { try { return JSON.parse((values.codelist||{}).auto_linked || "{}"); } catch { return {}; } })();
+      const allRows = [...userRows, ...aVars.filter(a => !userSet.has(a.variable.toLowerCase())).map(a => {
+        const lk = autoLinkedMap[a.variable.toLowerCase().trim()];
+        return lk ? { ...a, codelists: lk } : a;
+      })];
       if (allRows.length === 0) return 0;
-      const filled = allRows.filter(r => r.code_list_ref && r.code_list_ref.trim()).length;
+      const filled = allRows.filter(r => (r.code_list_ref && r.code_list_ref.trim()) || (Array.isArray(r.codelists) && r.codelists.length > 0)).length;
       return Math.round((filled / allRows.length) * 100);
     }
 
@@ -2315,8 +2354,15 @@ function ChecklistSection({ checked, onToggle, studyType, values, tflSelected, s
   autoChecked.c31 = tflSelected.length >= 3;
   autoChecked.c32 = tflSelected.length > 0;
   // Code Lists
-  const clRows = (() => { try { return JSON.parse((values?.codelist || {}).rows || "[]"); } catch { return []; } })();
-  autoChecked.c33 = clRows.length > 0 && clRows.every(r => r.code_list_ref && r.code_list_ref.trim());
+  const clUserRows = (() => { try { return JSON.parse((values?.codelist || {}).rows || "[]"); } catch { return []; } })();
+  const clAutoVars = computeCodelistAutoVars(values);
+  const clAutoLinked = (() => { try { return JSON.parse((values?.codelist || {}).auto_linked || "{}"); } catch { return {}; } })();
+  const clUserSet = new Set(clUserRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
+  const clAllRows = [...clUserRows, ...clAutoVars.filter(a => !clUserSet.has(a.variable.toLowerCase())).map(a => {
+    const lk = clAutoLinked[a.variable.toLowerCase().trim()];
+    return lk ? { ...a, codelists: lk } : a;
+  })];
+  autoChecked.c33 = clAllRows.length > 0 && clAllRows.every(r => (r.code_list_ref && r.code_list_ref.trim()) || (Array.isArray(r.codelists) && r.codelists.length > 0));
   autoChecked.c34 = !!((values?.codelist || {}).spec_ref);
   // Final review — manual
   autoChecked.c35 = false;
@@ -2507,6 +2553,72 @@ function PreviewPanel({ meta, studyType, values, ffpData, tflSelected, checklist
   );
 }
 
+// ─── SHARED: compute auto-populated code list variables from workbench values ─
+function computeCodelistAutoVars(values) {
+  const dv = values.design || {};
+  const adj = values.adjustment || {};
+  const popVal = values.population || {};
+  const taVal = values.treatment_arms_section || {};
+  const autoVars = [];
+  const seen = new Set();
+  const addAuto = (variable, category, code_type, notes) => {
+    const v = variable.trim();
+    if (v && v.length > 1 && v.length < 80 && !seen.has(v.toLowerCase())) {
+      seen.add(v.toLowerCase());
+      autoVars.push({ variable: v, category, code_type: code_type || "", code_list_ref: "", notes: notes || "", _auto: true });
+    }
+  };
+  const extractTerms = (text) => {
+    if (!text) return [];
+    const terms = [];
+    const patterns = [
+      /\b(T[12]D[M]?|CKD|COPD|ESRD|ESKD|HF|CHF|AF|NAFLD|NASH|MACE|MI|CVD|CAD|PAD|DVT|PE|TIA|AKI|DKD|ASCVD)\b/gi,
+      /\b(hypertension|diabetes|obesity|asthma|stroke|cancer|pregnancy|heart failure|atrial fibrillation|chronic kidney disease|coronary artery disease|peripheral artery disease|hyperlipidemia|dyslipidemia|hypothyroidism|hyperthyroidism|depression|anxiety|GERD|osteoporosis|osteoarthritis|rheumatoid arthritis|gout|anemia|cirrhosis|hepatitis|pancreatitis|pneumonia|sepsis|dementia|Alzheimer|Parkinson|epilepsy|PCOS|endometriosis)\b/gi,
+      /\b(semaglutide|tirzepatide|liraglutide|dulaglutide|exenatide|canagliflozin|dapagliflozin|empagliflozin|ertugliflozin|metformin|insulin|sitagliptin|linagliptin|pioglitazone|glipizide|glyburide|atorvastatin|rosuvastatin|simvastatin|amlodipine|lisinopril|losartan|valsartan|metoprolol|carvedilol|furosemide|spironolactone|apixaban|rivaroxaban|warfarin|aspirin|clopidogrel)\b/gi,
+      /\b(GLP-1[- ]?RA?|SGLT2[- ]?i(?:nhibitor)?|DPP-4[- ]?i(?:nhibitor)?|ACE[- ]?i(?:nhibitor)?|ARB|beta[- ]?blocker|statin|diuretic|anticoagulant|antiplatelet|antihypertensive|antidiabetic)\b/gi,
+      /\b(BMI|HbA1c|eGFR|creatinine|albumin|cholesterol|LDL|HDL|triglycerides|blood pressure|systolic|diastolic|weight|height|UACR|potassium|sodium|hemoglobin|BNP|NT-proBNP|troponin|ALT|AST|bilirubin|INR|CRP|ESR|TSH|FPG|fasting glucose)\b/gi,
+      /\b(CCI|Charlson|Elixhauser|DCSI|CHA2DS2-VASc)\b/gi,
+      /\b(hospitalization|ER visit|emergency department|outpatient visit|inpatient|readmission|dialysis|transplant|amputation|revascularization|PCI|CABG|catheterization)\b/gi,
+    ];
+    patterns.forEach(pat => { let m; while ((m = pat.exec(text)) !== null) { let term = m[0].trim(); if (term.length > 1) terms.push(term); } });
+    return [...new Set(terms)];
+  };
+  const inferCodeType = (term) => {
+    const t = term.toLowerCase();
+    if (/semaglutide|tirzepatide|liraglutide|dulaglutide|exenatide|canagliflozin|dapagliflozin|empagliflozin|ertugliflozin|metformin|insulin|sitagliptin|linagliptin|pioglitazone|glipizide|glyburide|atorvastatin|rosuvastatin|simvastatin|amlodipine|lisinopril|losartan|valsartan|metoprolol|carvedilol|furosemide|spironolactone|apixaban|rivaroxaban|warfarin|aspirin|clopidogrel/i.test(t)) return "NDC";
+    if (/glp-1|sglt2|dpp-4|ace.?i|arb|beta.?blocker|statin|diuretic|anticoagulant|antiplatelet|antihypertensive|antidiabetic/i.test(t)) return "NDC";
+    if (/bmi|hba1c|egfr|creatinine|albumin|cholesterol|ldl|hdl|triglycerides|uacr|potassium|sodium|hemoglobin|bnp|nt-probnp|troponin|alt|ast|bilirubin|inr|crp|esr|tsh|fpg|fasting glucose|blood pressure|systolic|diastolic|weight|height/i.test(t)) return "LOINC";
+    if (/cci|charlson|elixhauser|dcsi|cha2ds2/i.test(t)) return "Custom / Algorithm";
+    if (/hospitalization|er visit|emergency|outpatient|inpatient|readmission|dialysis|transplant|amputation|revascularization|pci|cabg|catheterization/i.test(t)) return "CPT / HCPCS";
+    return "ICD-10-CM";
+  };
+  const allIncl = (dv.inclusion_criteria || "") + "\n" + (popVal.inclusion_criteria || "");
+  const allExcl = (dv.exclusion_criteria || "") + "\n" + (popVal.exclusion_criteria || "");
+  const allTreat = (dv.treated_arm_name || "") + "\n" + (dv.treated_arm || "") + "\n" + (dv.control_arm_name || "") + "\n" + (dv.control_arm || "") + "\n" + (taVal.treated_arm_name || "") + "\n" + (taVal.treated_arm || "") + "\n" + (taVal.control_arm_name || "") + "\n" + (taVal.control_arm || "");
+  if (dv.primary_outcome || dv.primary_outcome_definition) {
+    const allPriText = (dv.primary_outcome || "") + " " + (dv.primary_outcome_definition || "");
+    const ot = extractTerms(allPriText);
+    if (ot.length) ot.forEach(t => addAuto(t, "Outcome", inferCodeType(t), ""));
+    else if (dv.primary_outcome) addAuto(dv.primary_outcome, "Outcome", "ICD-10-CM", "");
+  }
+  try { const so = JSON.parse(dv.secondary_outcomes || "[]"); so.forEach((s, i) => {
+    if (s.description || s.definition) {
+      const allSecText = (s.description || "") + " " + (s.definition || "");
+      const st = extractTerms(allSecText);
+      if (st.length) st.forEach(t => addAuto(t, "Outcome", inferCodeType(t), ""));
+      else if (s.description) addAuto(s.description, "Outcome", "ICD-10-CM", "");
+    }
+  }); } catch {}
+  extractTerms(allTreat).forEach(t => addAuto(t, "Exposure", inferCodeType(t), ""));
+  extractTerms(allIncl).forEach(t => { if (!seen.has(t.toLowerCase())) addAuto(t, "Inclusion", inferCodeType(t), ""); });
+  extractTerms(allExcl).forEach(t => { if (!seen.has(t.toLowerCase())) addAuto(t, "Exclusion", inferCodeType(t), ""); });
+  try { const brows = JSON.parse(adj.baseline_rows || "[]"); brows.forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).forEach(c => { addAuto(c, "Confounder", inferCodeType(c), ""); }); }); } catch {}
+  try { const tvrows = JSON.parse(adj.tv_rows || "[]"); tvrows.forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).forEach(c => { addAuto(c, "Confounder (TV)", inferCodeType(c), ""); }); }); } catch {}
+  try { const parseEv = (raw) => { try { return Object.keys(JSON.parse(raw || "{}")); } catch { return []; } }; parseEv(dv.intercurrent_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addAuto(e, "Event", inferCodeType(e), ""); }); parseEv(dv.censoring_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addAuto(e, "Event", inferCodeType(e), ""); }); parseEv(dv.competing_events).forEach(e => { if (e !== "Other") addAuto(e, "Event", inferCodeType(e), ""); }); } catch {}
+  try { const subs = JSON.parse((values.subgroup||{}).subgroups||"[]"); subs.forEach(s => { if (s.name && s.name.length < 60) addAuto(s.name, "Subgroup", "", ""); }); } catch {}
+  return autoVars;
+}
+
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 
 function SAPWorkbench() {
@@ -2527,6 +2639,11 @@ function SAPWorkbench() {
   const [prefs, setPrefs] = useState(DEFAULT_PREFERENCES);
   const [showPrefs, setShowPrefs] = useState(false);
   const [initialProposal, setInitialProposal] = useState(null);
+  const [uploadedCodelists, setUploadedCodelists] = useState({});
+  const [showPreloadModal, setShowPreloadModal] = useState(false);
+  const [preloadModalRowIdx, setPreloadModalRowIdx] = useState(null);
+  const [showCodelistModal, setShowCodelistModal] = useState(false);
+  const [codelistModalRowIdx, setCodelistModalRowIdx] = useState(null);
 
   // Load preferences from storage on mount
   useEffect(() => {
@@ -2728,6 +2845,97 @@ Only include observations where there is a clear pattern. Use empty arrays for c
 
   const toggleTFL = id => setTflSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const toggleChecklist = id => setChecklist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  // ─── Codelist helpers ───────────────────────────────────────────────────────
+  const autoMatchCodelist = useCallback((variableName) => {
+    const raw = (variableName || "").trim();
+    if (!raw) return null;
+    const tokens = raw.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-]/g, ' ').toLowerCase().split(/\s+/).filter(t => t.length > 2);
+    if (!tokens.length) return null;
+    let best = null, bestScore = 0;
+    PRELOAD_FILES.forEach(pf => {
+      const fname = pf.name.replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').toLowerCase();
+      let score = 0;
+      tokens.forEach(tok => { if (fname.includes(tok)) score++; });
+      if (score > bestScore) { bestScore = score; best = pf; }
+    });
+    return (best && bestScore > 0) ? best.name : null;
+  }, []);
+
+  const handleCodelistUpload = useCallback((files, rowIdx) => {
+    Array.from(files).forEach(file => {
+      const isTxt = /\.(txt|csv|tsv)$/i.test(file.name);
+      if (isTxt) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const text = e.target.result || "";
+          const codes = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).map(line => {
+            const parts = line.split(/\t|,/);
+            return { code: parts[0].trim(), description: (parts[1] || "").trim() };
+          });
+          setUploadedCodelists(prev => ({ ...prev, [file.name]: { codes, count: codes.length, label: file.name } }));
+        };
+        reader.readAsText(file);
+      } else {
+        setUploadedCodelists(prev => ({ ...prev, [file.name]: { codes: [], count: 0, refOnly: true, label: file.name } }));
+      }
+    });
+  }, []);
+
+  const linkCodelistToRow = useCallback((rowIdx, name) => {
+    const userRows = (() => { try { return JSON.parse(values.codelist?.rows || "[]"); } catch { return []; } })();
+    if (rowIdx >= userRows.length) {
+      // Auto row — store link in a separate map so row stays in place
+      const autoVars = computeCodelistAutoVars(values);
+      const userVarSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
+      const filteredAuto = autoVars.filter(a => !userVarSet.has(a.variable.toLowerCase()));
+      const autoRow = filteredAuto[rowIdx - userRows.length];
+      if (!autoRow) return;
+      const key = autoRow.variable.toLowerCase().trim();
+      const linked = (() => { try { return JSON.parse(values.codelist?.auto_linked || "{}"); } catch { return {}; } })();
+      const cls = Array.isArray(linked[key]) ? [...linked[key]] : [];
+      if (!cls.includes(name)) cls.push(name);
+      linked[key] = cls;
+      updateValue("codelist", "auto_linked", JSON.stringify(linked));
+    } else {
+      const r = userRows[rowIdx];
+      const cls = Array.isArray(r.codelists) ? [...r.codelists] : [];
+      if (cls.includes(name)) return;
+      cls.push(name);
+      updateValue("codelist", "rows", JSON.stringify(userRows.map((ur, i) => i === rowIdx ? { ...ur, codelists: cls } : ur)));
+    }
+  }, [values, updateValue]);
+
+  const unlinkCodelistFromRow = useCallback((rowIdx, codelistIdx) => {
+    const userRows = (() => { try { return JSON.parse(values.codelist?.rows || "[]"); } catch { return []; } })();
+    if (rowIdx >= userRows.length) {
+      // Auto row — remove from auto_linked map
+      const autoVars = computeCodelistAutoVars(values);
+      const userVarSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
+      const filteredAuto = autoVars.filter(a => !userVarSet.has(a.variable.toLowerCase()));
+      const autoRow = filteredAuto[rowIdx - userRows.length];
+      if (!autoRow) return;
+      const key = autoRow.variable.toLowerCase().trim();
+      const linked = (() => { try { return JSON.parse(values.codelist?.auto_linked || "{}"); } catch { return {}; } })();
+      const cls = Array.isArray(linked[key]) ? [...linked[key]] : [];
+      cls.splice(codelistIdx, 1);
+      if (cls.length > 0) linked[key] = cls; else delete linked[key];
+      updateValue("codelist", "auto_linked", JSON.stringify(linked));
+    } else {
+      const r = userRows[rowIdx];
+      if (!r || !Array.isArray(r.codelists)) return;
+      const cls = [...r.codelists];
+      cls.splice(codelistIdx, 1);
+      updateValue("codelist", "rows", JSON.stringify(userRows.map((ur, i) => i === rowIdx ? { ...ur, codelists: cls } : ur)));
+    }
+  }, [values, updateValue]);
+
+  const addCodelistLink = useCallback((label, url, rowIdx) => {
+    setUploadedCodelists(prev => ({ ...prev, [label]: { codes: [], count: 0, refOnly: true, url, label } }));
+    if (rowIdx != null) {
+      setTimeout(() => linkCodelistToRow(rowIdx, label), 0);
+    }
+  }, [linkCodelistToRow]);
 
   // Compute secondary outcomes from design section — must be before exportToWord and generateSAP
   const secondaryOutcomes = (() => {
@@ -3233,29 +3441,36 @@ Only include observations where there is a clear pattern. Use empty arrays for c
       const autoClVars = [];
       const clSeen = new Set();
       const addCl = (variable, category, code_type, notes) => { const v = stripB(variable).trim(); if (v && v.length > 1 && !clSeen.has(v.toLowerCase())) { clSeen.add(v.toLowerCase()); autoClVars.push({ variable: v, category, code_type: code_type || "", code_list_ref: "", notes: notes || "" }); } };
-      if (dv.primary_outcome) addCl(dv.primary_outcome, "Outcome", dv.primary_outcome_type === "Time-to-event" ? "ICD-10-CM" : "", "Primary outcome");
-      try { JSON.parse(dv.secondary_outcomes || "[]").forEach((s, i) => { if (s.description) addCl(s.description, "Outcome", s.type === "Time-to-event" ? "ICD-10-CM" : "", "Secondary outcome " + (i+1)); }); } catch {}
-      if (dv.treated_arm) addCl(dv.treated_arm.split(/[,;.\n]/)[0].trim(), "Exposure", "NDC", "Treated arm");
-      if (dv.control_arm) addCl(dv.control_arm.split(/[,;.\n]/)[0].trim(), "Exposure", "NDC", "Comparator arm");
-      if (dv.inclusion_criteria) { dv.inclusion_criteria.split(/[;\n]|,\s*(?=[A-Z•\-\*])/).map(s => stripB(s).trim()).filter(s => s.length > 5 && s.length < 80).forEach(part => { const cleaned = stripB(part).replace(/^(patients with|adults with|aged?\s*[≥><]\s*\d+\s*(years?)?|at least|with a|who have|having)\s*/i, "").trim(); if (cleaned.length > 3 && cleaned.length < 60 && !/^\d/.test(cleaned) && !/continuous enrollment|dispensing|index/i.test(cleaned)) addCl(cleaned, "Inclusion", "ICD-10-CM", "Inclusion criterion"); }); }
-      if (dv.exclusion_criteria) { dv.exclusion_criteria.split(/[;\n]|,\s*(?=[A-Z•\-\*])/).map(s => stripB(s).trim()).filter(s => s.length > 5 && s.length < 80).forEach(part => { const cleaned = stripB(part).replace(/^(patients with|exclude|excluding|prior use of|history of|active|any)\s*/i, "").trim(); if (cleaned.length > 3 && cleaned.length < 60 && !/^\d/.test(cleaned) && !/enrollment|washout/i.test(cleaned)) addCl(cleaned, "Exclusion", "ICD-10-CM", "Exclusion criterion"); }); }
-      try { JSON.parse((values.adjustment||{}).baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 2 && s.length < 60).forEach(c => { const ct = /bmi|weight|hba1c|egfr|lab|cholesterol|ldl|hdl|bp|blood pressure/i.test(c) ? "LOINC" : /medication|drug|statin|antihyper|ace inhibitor|beta blocker|insulin/i.test(c) ? "NDC" : /cci|comorbid|charlson|elixhauser/i.test(c) ? "Custom / Algorithm" : "ICD-10-CM"; addCl(c, "Confounder", ct, "Baseline confounder (window: " + (r.window || "baseline") + ")"); }); }); } catch {}
-      try { JSON.parse((values.adjustment||{}).tv_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 2 && s.length < 60).forEach(c => { addCl(c, "Confounder (TV)", "", "Time-varying"); }); }); } catch {}
-      try { const parseEv = (raw) => { try { return Object.keys(JSON.parse(raw || "{}")); } catch { return []; } }; parseEv(dv.intercurrent_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", "Intercurrent event"); }); parseEv(dv.censoring_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", "Censoring event"); }); parseEv(dv.competing_events).forEach(e => { if (e !== "Other") addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", "Competing event"); }); } catch {}
-      try { JSON.parse((values.subgroup||{}).subgroups||"[]").forEach(s => { if (s.name && s.name.length < 60) addCl(s.name, "Subgroup", "", "Subgroup variable"); }); } catch {}
+      if (dv.primary_outcome) addCl(dv.primary_outcome, "Outcome", dv.primary_outcome_type === "Time-to-event" ? "ICD-10-CM" : "", "");
+      try { JSON.parse(dv.secondary_outcomes || "[]").forEach((s, i) => { if (s.description) addCl(s.description, "Outcome", s.type === "Time-to-event" ? "ICD-10-CM" : "", ""); }); } catch {}
+      if (dv.treated_arm) addCl(dv.treated_arm.split(/[,;.\n]/)[0].trim(), "Exposure", "NDC", "");
+      if (dv.control_arm) addCl(dv.control_arm.split(/[,;.\n]/)[0].trim(), "Exposure", "NDC", "");
+      if (dv.inclusion_criteria) { dv.inclusion_criteria.split(/[;\n]|,\s*(?=[A-Z•\-\*])/).map(s => stripB(s).trim()).filter(s => s.length > 5 && s.length < 80).forEach(part => { const cleaned = stripB(part).replace(/^(patients with|adults with|aged?\s*[≥><]\s*\d+\s*(years?)?|at least|with a|who have|having)\s*/i, "").trim(); if (cleaned.length > 3 && cleaned.length < 60 && !/^\d/.test(cleaned) && !/continuous enrollment|dispensing|index/i.test(cleaned)) addCl(cleaned, "Inclusion", "ICD-10-CM", ""); }); }
+      if (dv.exclusion_criteria) { dv.exclusion_criteria.split(/[;\n]|,\s*(?=[A-Z•\-\*])/).map(s => stripB(s).trim()).filter(s => s.length > 5 && s.length < 80).forEach(part => { const cleaned = stripB(part).replace(/^(patients with|exclude|excluding|prior use of|history of|active|any)\s*/i, "").trim(); if (cleaned.length > 3 && cleaned.length < 60 && !/^\d/.test(cleaned) && !/enrollment|washout/i.test(cleaned)) addCl(cleaned, "Exclusion", "ICD-10-CM", ""); }); }
+      try { JSON.parse((values.adjustment||{}).baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 2 && s.length < 60).forEach(c => { const ct = /bmi|weight|hba1c|egfr|lab|cholesterol|ldl|hdl|bp|blood pressure/i.test(c) ? "LOINC" : /medication|drug|statin|antihyper|ace inhibitor|beta blocker|insulin/i.test(c) ? "NDC" : /cci|comorbid|charlson|elixhauser/i.test(c) ? "Custom / Algorithm" : "ICD-10-CM"; addCl(c, "Confounder", ct, ""); }); }); } catch {}
+      try { JSON.parse((values.adjustment||{}).tv_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 2 && s.length < 60).forEach(c => { addCl(c, "Confounder (TV)", "", ""); }); }); } catch {}
+      try { const parseEv = (raw) => { try { return Object.keys(JSON.parse(raw || "{}")); } catch { return []; } }; parseEv(dv.intercurrent_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", ""); }); parseEv(dv.censoring_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", ""); }); parseEv(dv.competing_events).forEach(e => { if (e !== "Other") addCl(e, "Event", e === "Death" ? "ICD-10-CM" : "", ""); }); } catch {}
+      try { JSON.parse((values.subgroup||{}).subgroups||"[]").forEach(s => { if (s.name && s.name.length < 60) addCl(s.name, "Subgroup", "", ""); }); } catch {}
 
-      // Merge: user rows override auto rows
+      // Merge: user rows override auto rows, auto_linked codelists applied to auto rows
       const userVarSet = new Set(userClRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
-      const allClRows = [...userClRows, ...autoClVars.filter(a => !userVarSet.has(a.variable.toLowerCase()))].filter(r => r.variable);
+      const exportAutoLinked = (() => { try { return JSON.parse((values.codelist||{}).auto_linked || "{}"); } catch { return {}; } })();
+      const allClRows = [...userClRows, ...autoClVars.filter(a => !userVarSet.has(a.variable.toLowerCase())).map(a => {
+        const linked = exportAutoLinked[a.variable.toLowerCase().trim()];
+        return linked ? { ...a, codelists: linked } : a;
+      })].filter(r => r.variable);
 
       if (allClRows.length > 0) {
         body += `<p>The following table maps study variables to their operational code lists in the data specification. Variables without a code list reference require operational definitions to be completed.</p>`;
         body += `<table style='width:100%;border-collapse:collapse;font-size:9pt;table-layout:fixed;word-wrap:break-word;'>`;
-        body += `<tr style='background:#003D73;'><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:20%;'>Variable</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:10%;'>Category</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:12%;'>Code Type</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:28%;'>Code List / Reference</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:30%;'>Notes</th></tr>`;
+        body += `<tr style='background:#003D73;'><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:17%;'>Variable</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:9%;'>Category</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:10%;'>Code Type</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:26%;'>Code List / Reference</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:12%;'>Plausible Range</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:26%;'>Notes</th></tr>`;
         allClRows.forEach((r, i) => {
-          const refStyle = r.code_list_ref && r.code_list_ref.trim() ? "" : "color:#C62828;font-style:italic;";
-          const refText = r.code_list_ref && r.code_list_ref.trim() ? r.code_list_ref : "[To be specified]";
-          body += `<tr style='background:${i%2===0?"#F5F8FC":"#fff"};'><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;font-weight:bold;'>${r.variable}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.category||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.code_type||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;${refStyle}'>${refText}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.notes||"—"}</td></tr>`;
+          const hasCl = (r.codelists && r.codelists.length > 0) || (r.code_list_ref && r.code_list_ref.trim());
+          const refStyle = hasCl ? "" : "color:#C62828;font-style:italic;";
+          const refText = r.codelists && r.codelists.length > 0
+            ? r.codelists.map(name => { const pf = PRELOAD_FILES.find(f => f.name === name); return pf ? `<a href="${pf.url}" style="color:#0060A9">${pf.label}</a>` : name; }).join("<br>")
+            : r.code_list_ref && r.code_list_ref.trim() ? r.code_list_ref : "[To be specified]";
+          body += `<tr style='background:${i%2===0?"#F5F8FC":"#fff"};'><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;font-weight:bold;'>${r.variable}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.category||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.code_type||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;${refStyle}'>${refText}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.possible_range&&r.possible_range.trim()?r.possible_range:"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.notes||"—"}</td></tr>`;
         });
         body += `</table>`;
       } else {
@@ -3858,24 +4073,30 @@ ${body}
         ? [(values.population||{}).inclusion_criteria, (values.population||{}).exclusion_criteria, (values.treatment_arms_section||{}).treated_arm_name, (values.treatment_arms_section||{}).treated_arm, (values.treatment_arms_section||{}).control_arm_name, (values.treatment_arms_section||{}).control_arm].filter(Boolean).join("\n")
         : [dv.inclusion_criteria, dv.exclusion_criteria, dv.treated_arm_name, dv.treated_arm, dv.control_arm_name, dv.control_arm, dv.primary_outcome, dv.primary_outcome_definition].filter(Boolean).join("\n");
       // Also extract from secondary outcome definitions
-      try { JSON.parse(dv.secondary_outcomes || "[]").forEach(s => { if (s.definition) extractCL(s.definition).forEach(t => addCl2(t, "Outcome", inferCT(t), "Secondary outcome component")); }); } catch {}
-      extractCL(allText).forEach(t => addCl2(t, "Variable", inferCT(t), "Auto-extracted"));
+      try { JSON.parse(dv.secondary_outcomes || "[]").forEach(s => { if (s.definition) extractCL(s.definition).forEach(t => addCl2(t, "Outcome", inferCT(t), "")); }); } catch {}
+      extractCL(allText).forEach(t => addCl2(t, "Variable", inferCT(t), ""));
 
       // Also add confounders
-      try { JSON.parse((values.adjustment||{}).baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1).forEach(c => addCl2(c, "Confounder", inferCT(c), "Baseline confounder")); }); } catch {}
+      try { JSON.parse((values.adjustment||{}).baseline_rows || "[]").forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1).forEach(c => addCl2(c, "Confounder", inferCT(c), "")); }); } catch {}
 
       const userVarSet2 = new Set(userClRows2.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
-      const allClRows2 = [...userClRows2, ...autoClVars2.filter(a => !userVarSet2.has(a.variable.toLowerCase()))].filter(r => r.variable);
+      const exportAutoLinked2 = (() => { try { return JSON.parse((values.codelist||{}).auto_linked || "{}"); } catch { return {}; } })();
+      const allClRows2 = [...userClRows2, ...autoClVars2.filter(a => !userVarSet2.has(a.variable.toLowerCase())).map(a => {
+        const lk = exportAutoLinked2[a.variable.toLowerCase().trim()];
+        return lk ? { ...a, codelists: lk } : a;
+      })].filter(r => r.variable);
 
       if (allClRows2.length > 0) {
         body += `<p>The following table maps study variables to their operational code lists in the data specification. Variables without a code list reference require operational definitions to be completed.</p>`;
         body += `<table style='width:100%;border-collapse:collapse;font-size:9pt;table-layout:fixed;word-wrap:break-word;'>`;
-        body += `<tr style='background:#003D73;'><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:20%;'>Variable</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:10%;'>Category</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:12%;'>Code Type</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:28%;'>Code List / Reference</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:30%;'>Notes</th></tr>`;
+        body += `<tr style='background:#003D73;'><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:17%;'>Variable</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:9%;'>Category</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:10%;'>Code Type</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:26%;'>Code List / Reference</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:12%;'>Plausible Range</th><th style='color:#fff;padding:4pt 6pt;text-align:left;border:1pt solid #003D73;width:26%;'>Notes</th></tr>`;
         allClRows2.forEach((r, i) => {
           const hasCl = (r.codelists && r.codelists.length > 0) || (r.code_list_ref && r.code_list_ref.trim());
           const refStyle = hasCl ? "" : "color:#C62828;font-style:italic;";
-          const refText = r.codelists && r.codelists.length > 0 ? r.codelists.join(", ") : r.code_list_ref && r.code_list_ref.trim() ? r.code_list_ref : "[To be specified]";
-          body += `<tr style='background:${i%2===0?"#F5F8FC":"#fff"};'><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;font-weight:bold;'>${r.variable}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.category||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.code_type||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;${refStyle}'>${refText}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.notes||"—"}</td></tr>`;
+          const refText = r.codelists && r.codelists.length > 0
+            ? r.codelists.map(name => { const pf = PRELOAD_FILES.find(f => f.name === name); return pf ? `<a href="${pf.url}" style="color:#0060A9">${pf.label}</a>` : name; }).join("<br>")
+            : r.code_list_ref && r.code_list_ref.trim() ? r.code_list_ref : "[To be specified]";
+          body += `<tr style='background:${i%2===0?"#F5F8FC":"#fff"};'><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;font-weight:bold;'>${r.variable}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.category||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.code_type||"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;${refStyle}'>${refText}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.possible_range&&r.possible_range.trim()?r.possible_range:"—"}</td><td style='padding:4pt 6pt;border:1pt solid #D1E3F3;'>${r.notes||"—"}</td></tr>`;
         });
         body += `</table>`;
       } else {
@@ -4116,6 +4337,88 @@ ${body}
           </div>
         </div>
       )}
+
+      {/* Preload Codelist Picker Modal */}
+      {showPreloadModal && (() => {
+        const PreloadInner = () => {
+          const [pfTA, setPfTA] = useState("");
+          const [pfSearch, setPfSearch] = useState("");
+          const filtered = PRELOAD_FILES.filter(f => !pfTA || f.ta === pfTA).filter(f => !pfSearch || f.name.toLowerCase().includes(pfSearch.toLowerCase()));
+          return (
+            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={e => { if (e.target === e.currentTarget) setShowPreloadModal(false); }}>
+              <div style={{ background: "#fff", borderRadius: 12, width: 520, maxHeight: "80vh", display: "flex", flexDirection: "column", boxShadow: "0 8px 32px rgba(0,0,0,0.2)", padding: "28px 32px", overflow: "hidden" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: LILLY_DARK }}>📁 Preload Files</span>
+                  <button onClick={() => setShowPreloadModal(false)} style={{ background: "none", border: "none", fontSize: 22, cursor: "pointer", color: "#999" }}>×</button>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                  {PRELOAD_TAS.map(ta => (
+                    <button key={ta} onClick={() => setPfTA(pfTA === ta ? "" : ta)} style={{ padding: "3px 11px", borderRadius: 20, fontSize: 12, fontWeight: 700, cursor: "pointer", border: `1px solid ${pfTA === ta ? LILLY_BLUE : "#C8DDF0"}`, background: pfTA === ta ? LILLY_LIGHT : "#fff", color: pfTA === ta ? LILLY_BLUE : "#666" }}>{ta}</button>
+                  ))}
+                </div>
+                <input value={pfSearch} onChange={e => setPfSearch(e.target.value)} placeholder="Search files..." autoFocus style={{ width: "100%", boxSizing: "border-box", padding: "8px 12px", border: "1px solid #ccc", borderRadius: 6, fontSize: 13, marginBottom: 12 }} />
+                <div style={{ overflowY: "auto", flex: 1, border: `1px solid ${LILLY_LIGHT}`, borderRadius: 8 }}>
+                  {filtered.length === 0 ? (
+                    <p style={{ textAlign: "center", color: "#888", padding: 24, fontSize: 13 }}>No files match{pfTA ? ` [${pfTA}]` : ""}{pfSearch ? ` "${pfSearch}"` : ""}</p>
+                  ) : filtered.map(f => (
+                    <div key={f.name} onClick={() => { linkCodelistToRow(preloadModalRowIdx, f.name); setShowPreloadModal(false); }}
+                      style={{ padding: "10px 14px", cursor: "pointer", borderBottom: `1px solid ${LILLY_LIGHT}`, fontSize: 13, color: "#222", display: "flex", alignItems: "center", gap: 8 }}
+                      onMouseOver={e => e.currentTarget.style.background = LILLY_LIGHT} onMouseOut={e => e.currentTarget.style.background = ""}>
+                      <span style={{ flex: 1 }}>{f.name}</span>
+                      {f.ta && <span style={{ fontSize: 10, fontWeight: 700, background: LILLY_LIGHT, color: LILLY_BLUE, borderRadius: 8, padding: "1px 7px" }}>{f.ta}</span>}
+                      <a href={f.url} target="_blank" rel="noreferrer" onClick={e => e.stopPropagation()} style={{ fontSize: 11, color: LILLY_BLUE, whiteSpace: "nowrap" }}>🔗 Open</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        };
+        return <PreloadInner />;
+      })()}
+
+      {/* Codelist Upload/Link Modal */}
+      {showCodelistModal && (() => {
+        const CodelistInner = () => {
+          const [activeTab, setActiveTab] = useState("link");
+          const [linkLabel, setLinkLabel] = useState("");
+          const [linkUrl, setLinkUrl] = useState("");
+          const fileRef = useRef(null);
+          return (
+            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }} onClick={e => { if (e.target === e.currentTarget) setShowCodelistModal(false); }}>
+              <div style={{ background: "#fff", borderRadius: 12, padding: "28px 32px", width: 460, maxWidth: "95vw", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 18 }}>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: LILLY_DARK }}>📂 Add Codelist</span>
+                  <button onClick={() => setShowCodelistModal(false)} style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#888" }}>×</button>
+                </div>
+                <div style={{ display: "flex", gap: 0, borderBottom: `2px solid ${LILLY_LIGHT}`, marginBottom: 18 }}>
+                  <button onClick={() => setActiveTab("link")} style={{ padding: "7px 18px", border: "none", background: "none", fontSize: 13, fontWeight: 700, cursor: "pointer", color: activeTab === "link" ? LILLY_BLUE : "#888", borderBottom: `3px solid ${activeTab === "link" ? LILLY_BLUE : "transparent"}`, marginBottom: -2 }}>🔗 Paste Link</button>
+                  <button onClick={() => setActiveTab("file")} style={{ padding: "7px 18px", border: "none", background: "none", fontSize: 13, fontWeight: 700, cursor: "pointer", color: activeTab === "file" ? LILLY_BLUE : "#888", borderBottom: `3px solid ${activeTab === "file" ? LILLY_BLUE : "transparent"}`, marginBottom: -2 }}>📄 Upload File</button>
+                </div>
+                {activeTab === "link" && (
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#444", display: "block", marginBottom: 4 }}>Display Name</label>
+                    <input value={linkLabel} onChange={e => setLinkLabel(e.target.value)} placeholder="e.g. Obesity Medication Code List (V6)" style={{ width: "100%", boxSizing: "border-box", padding: "7px 10px", border: "1px solid #C8DDF0", borderRadius: 6, fontSize: 13, marginBottom: 12 }} />
+                    <label style={{ fontSize: 12, fontWeight: 700, color: "#444", display: "block", marginBottom: 4 }}>Teams / SharePoint Link</label>
+                    <input value={linkUrl} onChange={e => setLinkUrl(e.target.value)} type="url" placeholder="https://collab.lilly.com/..." style={{ width: "100%", boxSizing: "border-box", padding: "7px 10px", border: "1px solid #C8DDF0", borderRadius: 6, fontSize: 13 }} />
+                    <p style={{ fontSize: 11, color: "#888", margin: "8px 0 18px" }}>In Teams, right-click the file, then Copy link</p>
+                    <button onClick={() => { if (!linkLabel.trim() || !linkUrl.trim()) { alert("Please enter both a display name and a link."); return; } addCodelistLink(linkLabel.trim(), linkUrl.trim(), codelistModalRowIdx); setShowCodelistModal(false); }} style={{ width: "100%", padding: "8px 16px", background: GREEN, color: "#fff", border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer" }}>Add Codelist</button>
+                  </div>
+                )}
+                {activeTab === "file" && (
+                  <div>
+                    <p style={{ fontSize: 12, color: "#555", margin: "0 0 14px" }}>Upload a .txt or .csv file — codes will be parsed. .xlsx files are stored as reference-only.</p>
+                    <input ref={fileRef} type="file" accept=".txt,.csv,.tsv,.xlsx" multiple style={{ padding: 6, width: "100%", boxSizing: "border-box" }} />
+                    <p style={{ fontSize: 11, color: "#888", margin: "8px 0 18px" }}>After uploading you can still paste a Teams link to use instead.</p>
+                    <button onClick={() => { if (!fileRef.current?.files?.length) { alert("Please select a file."); return; } handleCodelistUpload(fileRef.current.files, codelistModalRowIdx); setShowCodelistModal(false); }} style={{ width: "100%", padding: "8px 16px", background: GREEN, color: "#fff", border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer" }}>Upload</button>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        };
+        return <CodelistInner />;
+      })()}
 
       {/* Literature Review → Study Proposal Modal */}
       {showLitReview && (
@@ -5315,9 +5618,23 @@ Respond ONLY with a JSON object (no markdown, no backticks, no preamble) with th
                         {(() => {
                           const userRows = (() => { try { return JSON.parse(values.codelist?.rows || "[]"); } catch { return []; } })();
                           const updateRows = (newRows) => updateValue("codelist", "rows", JSON.stringify(newRows));
-                          const addRow = () => updateRows([...rows, { variable: "", category: "", code_type: "", code_list_ref: "", notes: "", _auto: false }]);
+                          const addRow = () => updateRows([{ variable: "", category: "", code_type: "", code_list_ref: "", codelists: [], possible_range: "", notes: "", _auto: false }, ...userRows]);
+                          const sortRows = () => {
+                            const autoVarsNow = computeCodelistAutoVars(values);
+                            const autoLinkedNow = (() => { try { return JSON.parse(values.codelist?.auto_linked || "{}"); } catch { return {}; } })();
+                            const uSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
+                            const allForSort = [...userRows, ...autoVarsNow.filter(a => !uSet.has(a.variable.toLowerCase())).map(a => {
+                              const lk = autoLinkedNow[a.variable.toLowerCase().trim()];
+                              return lk ? { ...a, _auto: false, codelists: lk } : { ...a, _auto: false };
+                            })];
+                            const order = ["Exposure", "Outcome", "Event", "Inclusion", "Exclusion", "Confounder", "Confounder (TV)", "Subgroup", "Other", ""];
+                            allForSort.sort((a, b) => {
+                              const ai = order.indexOf(a.category || ""); const bi = order.indexOf(b.category || "");
+                              return (ai === -1 ? order.length : ai) - (bi === -1 ? order.length : bi);
+                            });
+                            updateRows(allForSort);
+                          };
                           const updateRow = (i, field, val) => {
-                            // If editing an auto row, save it to user rows first
                             const r = rows[i];
                             if (r._auto) {
                               const saved = [...userRows, { ...r, _auto: false, [field]: val }];
@@ -5328,122 +5645,52 @@ Respond ONLY with a JSON object (no markdown, no backticks, no preamble) with th
                           };
                           const removeRow = (i) => {
                             const r = rows[i];
-                            if (r._auto) return; // can't remove auto rows
+                            if (r._auto) return;
                             updateRows(userRows.filter((_, idx) => idx !== i));
                           };
                           const base = { padding: "6px 8px", border: "1px solid #C8DDF0", borderRadius: 4, fontSize: 12, outline: "none", background: "#fff", boxSizing: "border-box", width: "100%" };
 
-                          // Compute auto-populated variables from workbench — extract individual codeable terms
-                          const dv = values.design || {};
-                          const adj = values.adjustment || {};
-                          const popVal = values.population || {};
-                          const taVal = values.treatment_arms_section || {};
-                          const autoVars = [];
-                          const seen = new Set();
-                          const addAuto = (variable, category, code_type, notes) => {
-                            const v = variable.trim();
-                            if (v && v.length > 1 && v.length < 80 && !seen.has(v.toLowerCase())) {
-                              seen.add(v.toLowerCase());
-                              autoVars.push({ variable: v, category, code_type: code_type || "", code_list_ref: "", notes: notes || "", _auto: true });
+                          const autoVars = computeCodelistAutoVars(values);
+                          const autoLinked = (() => { try { return JSON.parse(values.codelist?.auto_linked || "{}"); } catch { return {}; } })();
+                          const dismissedSuggestions = (() => { try { return JSON.parse(values.codelist?.dismissed_suggestions || "[]"); } catch { return []; } })();
+                          const dismissSuggestion = (varName, suggName) => {
+                            const key = varName.toLowerCase().trim() + "|||" + suggName;
+                            if (!dismissedSuggestions.includes(key)) {
+                              updateValue("codelist", "dismissed_suggestions", JSON.stringify([...dismissedSuggestions, key]));
                             }
                           };
-
-                          // Helper: extract individual clinical terms from free text
-                          const extractTerms = (text) => {
-                            if (!text) return [];
-                            const terms = [];
-                            const patterns = [
-                              /\b(T[12]D[M]?|CKD|COPD|ESRD|ESKD|HF|CHF|AF|NAFLD|NASH|MACE|MI|CVD|CAD|PAD|DVT|PE|TIA|AKI|DKD|ASCVD)\b/gi,
-                              /\b(hypertension|diabetes|obesity|asthma|stroke|cancer|pregnancy|heart failure|atrial fibrillation|chronic kidney disease|coronary artery disease|peripheral artery disease|hyperlipidemia|dyslipidemia|hypothyroidism|hyperthyroidism|depression|anxiety|GERD|osteoporosis|osteoarthritis|rheumatoid arthritis|gout|anemia|cirrhosis|hepatitis|pancreatitis|pneumonia|sepsis|dementia|Alzheimer|Parkinson|epilepsy|PCOS|endometriosis)\b/gi,
-                              /\b(semaglutide|tirzepatide|liraglutide|dulaglutide|exenatide|canagliflozin|dapagliflozin|empagliflozin|ertugliflozin|metformin|insulin|sitagliptin|linagliptin|pioglitazone|glipizide|glyburide|atorvastatin|rosuvastatin|simvastatin|amlodipine|lisinopril|losartan|valsartan|metoprolol|carvedilol|furosemide|spironolactone|apixaban|rivaroxaban|warfarin|aspirin|clopidogrel)\b/gi,
-                              /\b(GLP-1[- ]?RA?|SGLT2[- ]?i(?:nhibitor)?|DPP-4[- ]?i(?:nhibitor)?|ACE[- ]?i(?:nhibitor)?|ARB|beta[- ]?blocker|statin|diuretic|anticoagulant|antiplatelet|antihypertensive|antidiabetic)\b/gi,
-                              /\b(BMI|HbA1c|eGFR|creatinine|albumin|cholesterol|LDL|HDL|triglycerides|blood pressure|systolic|diastolic|weight|height|UACR|potassium|sodium|hemoglobin|BNP|NT-proBNP|troponin|ALT|AST|bilirubin|INR|CRP|ESR|TSH|FPG|fasting glucose)\b/gi,
-                              /\b(CCI|Charlson|Elixhauser|DCSI|CHA2DS2-VASc)\b/gi,
-                              /\b(hospitalization|ER visit|emergency department|outpatient visit|inpatient|readmission|dialysis|transplant|amputation|revascularization|PCI|CABG|catheterization)\b/gi,
-                            ];
-                            patterns.forEach(pat => {
-                              let m;
-                              while ((m = pat.exec(text)) !== null) {
-                                let term = m[0].trim();
-                                if (term.length > 1) terms.push(term);
-                              }
-                            });
-                            return [...new Set(terms)];
-                          };
-
-                          // Helper: infer code type from variable name
-                          const inferCodeType = (term) => {
-                            const t = term.toLowerCase();
-                            if (/semaglutide|tirzepatide|liraglutide|dulaglutide|exenatide|canagliflozin|dapagliflozin|empagliflozin|ertugliflozin|metformin|insulin|sitagliptin|linagliptin|pioglitazone|glipizide|glyburide|atorvastatin|rosuvastatin|simvastatin|amlodipine|lisinopril|losartan|valsartan|metoprolol|carvedilol|furosemide|spironolactone|apixaban|rivaroxaban|warfarin|aspirin|clopidogrel/i.test(t)) return "NDC";
-                            if (/glp-1|sglt2|dpp-4|ace.?i|arb|beta.?blocker|statin|diuretic|anticoagulant|antiplatelet|antihypertensive|antidiabetic/i.test(t)) return "NDC";
-                            if (/bmi|hba1c|egfr|creatinine|albumin|cholesterol|ldl|hdl|triglycerides|uacr|potassium|sodium|hemoglobin|bnp|nt-probnp|troponin|alt|ast|bilirubin|inr|crp|esr|tsh|fpg|fasting glucose|blood pressure|systolic|diastolic|weight|height/i.test(t)) return "LOINC";
-                            if (/cci|charlson|elixhauser|dcsi|cha2ds2/i.test(t)) return "Custom / Algorithm";
-                            if (/hospitalization|er visit|emergency|outpatient|inpatient|readmission|dialysis|transplant|amputation|revascularization|pci|cabg|catheterization/i.test(t)) return "CPT / HCPCS";
-                            return "ICD-10-CM";
-                          };
-
-                          // Extract from all text sources — include name AND definition fields
-                          const allIncl = (dv.inclusion_criteria || "") + "\n" + (popVal.inclusion_criteria || "");
-                          const allExcl = (dv.exclusion_criteria || "") + "\n" + (popVal.exclusion_criteria || "");
-                          const allTreat = (dv.treated_arm_name || "") + "\n" + (dv.treated_arm || "") + "\n" + (dv.control_arm_name || "") + "\n" + (dv.control_arm || "") + "\n" + (taVal.treated_arm_name || "") + "\n" + (taVal.treated_arm || "") + "\n" + (taVal.control_arm_name || "") + "\n" + (taVal.control_arm || "");
-
-                          // Primary & secondary outcomes — extract from both name and definition
-                          if (dv.primary_outcome || dv.primary_outcome_definition) {
-                            const allPriText = (dv.primary_outcome || "") + " " + (dv.primary_outcome_definition || "");
-                            const ot = extractTerms(allPriText);
-                            if (ot.length) ot.forEach(t => addAuto(t, "Outcome", inferCodeType(t), "Primary outcome component"));
-                            else if (dv.primary_outcome) addAuto(dv.primary_outcome, "Outcome", "ICD-10-CM", "Primary outcome");
-                          }
-                          try { const so = JSON.parse(dv.secondary_outcomes || "[]"); so.forEach((s, i) => {
-                            if (s.description || s.definition) {
-                              const allSecText = (s.description || "") + " " + (s.definition || "");
-                              const st = extractTerms(allSecText);
-                              if (st.length) st.forEach(t => addAuto(t, "Outcome", inferCodeType(t), "Secondary outcome " + (i+1) + " component"));
-                              else if (s.description) addAuto(s.description, "Outcome", "ICD-10-CM", "Secondary outcome " + (i+1));
-                            }
-                          }); } catch {}
-
-                          // Treatment arms — extract drug names from both name and definition
-                          extractTerms(allTreat).forEach(t => addAuto(t, "Exposure", inferCodeType(t), "Treatment/comparator"));
-
-                          // Inclusion criteria — extract conditions, labs, drugs
-                          extractTerms(allIncl).forEach(t => { if (!seen.has(t.toLowerCase())) addAuto(t, "Inclusion", inferCodeType(t), "Inclusion criterion"); });
-
-                          // Exclusion criteria
-                          extractTerms(allExcl).forEach(t => { if (!seen.has(t.toLowerCase())) addAuto(t, "Exclusion", inferCodeType(t), "Exclusion criterion"); });
-
-                          // Confounders (RWE)
-                          try { const brows = JSON.parse(adj.baseline_rows || "[]"); brows.forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).forEach(c => { addAuto(c, "Confounder", inferCodeType(c), "Baseline confounder"); }); }); } catch {}
-                          try { const tvrows = JSON.parse(adj.tv_rows || "[]"); tvrows.forEach(r => { if (r.confounders) r.confounders.split(/[,;]/).map(s => s.trim()).filter(s => s.length > 1 && s.length < 60).forEach(c => { addAuto(c, "Confounder (TV)", inferCodeType(c), "Time-varying"); }); }); } catch {}
-
-                          // Events (RWE)
-                          try { const parseEv = (raw) => { try { return Object.keys(JSON.parse(raw || "{}")); } catch { return []; } }; parseEv(dv.intercurrent_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addAuto(e, "Event", inferCodeType(e), "Intercurrent event"); }); parseEv(dv.censoring_events).forEach(e => { if (!/Other|End of follow-up|End of continuous|Loss to follow/i.test(e)) addAuto(e, "Event", inferCodeType(e), "Censoring event"); }); parseEv(dv.competing_events).forEach(e => { if (e !== "Other") addAuto(e, "Event", inferCodeType(e), "Competing event"); }); } catch {}
-
-                          // Subgroups (RWE)
-                          try { const subs = JSON.parse((values.subgroup||{}).subgroups||"[]"); subs.forEach(s => { if (s.name && s.name.length < 60) addAuto(s.name, "Subgroup", "", "Subgroup variable"); }); } catch {}
-                          // Merge: user rows first, then auto rows not already covered by user
                           const userVarSet = new Set(userRows.map(r => r.variable?.toLowerCase().trim()).filter(Boolean));
-                          const rows = [...userRows, ...autoVars.filter(a => !userVarSet.has(a.variable.toLowerCase()))];
+                          const rows = [...userRows, ...autoVars.filter(a => !userVarSet.has(a.variable.toLowerCase())).map(a => {
+                            const linked = autoLinked[a.variable.toLowerCase().trim()];
+                            return linked ? { ...a, codelists: linked } : a;
+                          })];
 
                           return (
                             <div>
                               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                                 <button onClick={addRow} style={{ padding: "7px 14px", border: "1px dashed #C8DDF0", borderRadius: 6, background: "#F5F8FC", color: LILLY_BLUE, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>+ Add Row</button>
+                                <button onClick={sortRows} style={{ padding: "7px 14px", border: "1px dashed #C8DDF0", borderRadius: 6, background: "#F5F8FC", color: LILLY_BLUE, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>↕ Sort by Category</button>
+                                <button onClick={() => { setCodelistModalRowIdx(null); setShowCodelistModal(true); }} style={{ padding: "7px 14px", border: "1px dashed #CE93D8", borderRadius: 6, background: "#F8F0FF", color: PURPLE, fontSize: 12, fontWeight: 700, cursor: "pointer" }}>📂 Add Codelist</button>
                               </div>
                               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
                                 <thead>
                                   <tr style={{ background: LILLY_DARK }}>
-                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "20%" }}>Variable</th>
-                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "10%" }}>Category</th>
-                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "12%" }}>Code Type</th>
-                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "26%" }}>Code List / Reference</th>
-                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "26%" }}>Notes</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "15%" }}>Variable</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "9%" }}>Category</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "10%" }}>Code Type</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "27%" }}>Code List / Reference</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "13%" }}>Plausible Range</th>
+                                    <th style={{ color: "#fff", padding: "6px 8px", textAlign: "left", fontWeight: 700, width: "20%" }}>Notes</th>
                                     <th style={{ color: "#fff", padding: "6px 8px", textAlign: "center", fontWeight: 700, width: "6%" }}></th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   {rows.map((row, i) => {
                                     const catColor = { Outcome: "#E8F5E9", Exposure: "#FFF3E0", Inclusion: "#E8F2FA", Exclusion: "#FFEBEE", Confounder: "#F3E5F5", "Confounder (TV)": "#F3E5F5", Event: "#FFF8E1", Subgroup: "#E0F2F1" }[row.category] || "#fff";
+                                    const cls = Array.isArray(row.codelists) ? row.codelists : [];
+                                    const suggestion = autoMatchCodelist(row.variable);
+                                    const isDismissed = suggestion && dismissedSuggestions.includes(row.variable.toLowerCase().trim() + "|||" + suggestion);
+                                    const showSuggestion = suggestion && !cls.includes(suggestion) && !isDismissed;
                                     return (
                                     <tr key={i} style={{ background: i % 2 === 0 ? "#FAFBFC" : "#fff" }}>
                                       <td style={{ padding: "4px 6px", borderBottom: "1px solid #E0E0E0" }}>
@@ -5480,10 +5727,63 @@ Respond ONLY with a JSON object (no markdown, no backticks, no preamble) with th
                                         </select>
                                       </td>
                                       <td style={{ padding: "4px 6px", borderBottom: "1px solid #E0E0E0" }}>
-                                        <input value={row.code_list_ref} placeholder="e.g. Appendix A Table 3" onChange={e => updateRow(i, "code_list_ref", e.target.value)} style={base} />
+                                        <div style={{ maxWidth: 260 }}>
+                                          {cls.map((name, ci) => {
+                                            const pf = PRELOAD_FILES.find(f => f.name === name);
+                                            const ucl = uploadedCodelists[name];
+                                            const href = pf ? pf.url : ucl?.url || "";
+                                            const label = pf ? pf.label : ucl?.label || name;
+                                            const short = label.replace(/\.[^.]+$/, '').slice(0, 20) + (label.replace(/\.[^.]+$/, '').length > 20 ? '...' : '');
+                                            return (
+                                              <div key={ci} style={{ display: "inline-flex", alignItems: "center", gap: 4, background: LILLY_LIGHT, border: "1px solid #B0CFE8", borderRadius: 12, padding: "2px 8px 2px 10px", fontSize: 11, color: LILLY_DARK, margin: 2, maxWidth: 200 }} title={label}>
+                                                {href ? <a href={href} target="_blank" rel="noreferrer" style={{ color: LILLY_DARK, textDecoration: "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{short}</a>
+                                                  : <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{short}</span>}
+                                                <button onClick={() => unlinkCodelistFromRow(i, ci)} style={{ background: "none", border: "none", cursor: "pointer", color: "#888", fontSize: 12, lineHeight: 1, padding: "0 0 0 2px", flexShrink: 0 }} title="Remove">×</button>
+                                              </div>
+                                            );
+                                          })}
+                                          {showSuggestion && (() => {
+                                            const sShort = suggestion.replace(/\.[^.]+$/, '').slice(0, 18) + (suggestion.replace(/\.[^.]+$/, '').length > 18 ? '...' : '');
+                                            return (
+                                              <div style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#FFF8E1", border: "1px solid #FFD54F", borderRadius: 12, padding: "2px 8px 2px 10px", fontSize: 11, color: "#6D4C0A", margin: 2, maxWidth: 200 }} title={suggestion}>
+                                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>✨ {sShort}</span>
+                                                <button onClick={() => linkCodelistToRow(i, suggestion)} style={{ background: "#FFD54F", border: "none", cursor: "pointer", borderRadius: 8, padding: "1px 6px", fontSize: 11, color: "#3E2700", fontWeight: 700, flexShrink: 0 }}>Add</button>
+                                                <button onClick={() => dismissSuggestion(row.variable, suggestion)} style={{ background: "none", border: "none", cursor: "pointer", color: "#999", fontSize: 13, lineHeight: 1, padding: "0 0 0 2px", flexShrink: 0 }} title="Dismiss suggestion">×</button>
+                                              </div>
+                                            );
+                                          })()}
+                                          <select value="" onChange={e => {
+                                            const val = e.target.value;
+                                            if (val === "__preload__") { setPreloadModalRowIdx(i); setShowPreloadModal(true); }
+                                            else if (val === "__upload__") { setCodelistModalRowIdx(i); setShowCodelistModal(true); }
+                                            else if (val) linkCodelistToRow(i, val);
+                                          }} style={{ ...base, marginTop: cls.length ? 4 : 0, maxWidth: 180, fontSize: 11 }}>
+                                            <option value="" disabled>Add codelist...</option>
+                                            <option value="__preload__">📁 Preload Files...</option>
+                                            {Object.keys(uploadedCodelists).length > 0 && (
+                                              <optgroup label="Uploaded">
+                                                {Object.entries(uploadedCodelists).map(([fname, cl]) => (
+                                                  <option key={fname} value={fname}>{cl.url ? "🔗" : cl.refOnly ? "📎" : "📄"} {cl.label || fname}{cl.url ? "" : cl.refOnly ? "" : ` (${cl.count})`}</option>
+                                                ))}
+                                              </optgroup>
+                                            )}
+                                            <option value="__upload__">📂 Upload / Link...</option>
+                                          </select>
+                                        </div>
                                       </td>
                                       <td style={{ padding: "4px 6px", borderBottom: "1px solid #E0E0E0" }}>
-                                        <input value={row.notes} placeholder="e.g. Dx position 1-2 only" onChange={e => updateRow(i, "notes", e.target.value)} style={base} />
+                                        {(row.possible_range && row.possible_range !== "—")
+                                          ? <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+                                              <input value={row.possible_range} onChange={e => updateRow(i, "possible_range", e.target.value)} style={{ ...base, flex: 1 }} />
+                                              <button onClick={() => updateRow(i, "possible_range", "")} style={{ background: "none", border: "none", cursor: "pointer", color: "#999", fontSize: 13, padding: 0, lineHeight: 1 }} title="Clear">×</button>
+                                            </div>
+                                          : <select value="" onChange={e => { if (e.target.value === "__enter__") updateRow(i, "possible_range", " "); }} style={{ ...base, fontSize: 11, color: "#bbb" }}>
+                                              <option value="">—</option>
+                                              <option value="__enter__">Enter range...</option>
+                                            </select>}
+                                      </td>
+                                      <td style={{ padding: "4px 6px", borderBottom: "1px solid #E0E0E0" }}>
+                                        <input value={row.notes} placeholder="" onChange={e => updateRow(i, "notes", e.target.value)} style={base} />
                                       </td>
                                       <td style={{ padding: "4px 6px", borderBottom: "1px solid #E0E0E0", textAlign: "center" }}>
                                         <button onClick={() => removeRow(i)} style={{ background: "#FFEBEE", border: "none", borderRadius: 4, color: "#C62828", fontWeight: 900, fontSize: 13, cursor: "pointer", padding: "2px 6px" }}>×</button>
@@ -5496,7 +5796,7 @@ Respond ONLY with a JSON object (no markdown, no backticks, no preamble) with th
                                 <div style={{ marginTop: 8, fontSize: 11, color: "#888" }}>
                                   {rows.length} variable{rows.length !== 1 ? "s" : ""} mapped
                                   {" · "}
-                                  {rows.filter(r => !r.code_list_ref).length > 0 && <span style={{ color: AMBER }}>{rows.filter(r => !r.code_list_ref).length} missing code list reference</span>}
+                                  {rows.filter(r => !(r.code_list_ref && r.code_list_ref.trim()) && !(Array.isArray(r.codelists) && r.codelists.length > 0)).length > 0 && <span style={{ color: AMBER }}>{rows.filter(r => !(r.code_list_ref && r.code_list_ref.trim()) && !(Array.isArray(r.codelists) && r.codelists.length > 0)).length} missing code list reference</span>}
                                 </div>
                               )}
                               <div style={{ marginTop: 16 }}>
